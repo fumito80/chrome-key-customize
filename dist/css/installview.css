@@ -1,0 +1,39 @@
+body {
+  padding: 0 5px
+}
+h3 {
+  border-bottom: 1px solid #eee;
+  margin-top: 1.5em;
+  padding-bottom: 0.3em;
+  margin-bottom: 0.3em;
+}
+em {
+  color: #080;
+}
+#content > p {
+  font-size: 1.3em;
+}
+#content li {
+  font-size: 1.3em;
+}
+#content pre {
+  font-family: 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
+  font-size: 1.2em;
+  line-height: 1.3em;
+  margin-top: 10px;
+}
+pre.prettyprint {
+  background: whitesmoke;
+  padding: 10px;
+  box-shadow: none;
+  border: 1px solid #ddd;
+  /*border: 0;*/
+  /*border-radius: 0;*/
+  display: inline-block;
+}
+pre.prettyprint .kwd {
+  color: #000;
+}
+pre.prettyprint .str {
+  font-style: oblique;
+}

@@ -2,8 +2,11 @@
 coffee = require 'gulp-coffee'
 babel  = require 'gulp-babel'
 uglify = require('gulp-uglify-es').default
+concat = require 'gulp-concat'
 tap    = require 'gulp-tap'
 zipfld = require 'zip-folder'
+del    = require 'del'
+gulpif = require 'gulp-if'
 
 uglifyOrThru = ->
   if process.argv.includes 'dev'
@@ -12,19 +15,45 @@ uglifyOrThru = ->
     uglify()
 
 zip = (done) ->
-  manifest = JSON.parse require('fs').readFileSync('./dist/manifest.json')
-  zipfld './dist', "./zipped/shs.#{manifest.version}.zip", (err) ->
-    done(err)
+  if process.argv.includes 'dev'
+    console.log 'Skip zipped'
+    done()
+  else
+    manifest = JSON.parse require('fs').readFileSync('./dist/manifest.json')
+    zipfld './dist', "./zipped/kbd.#{manifest.version}.zip", (err) ->
+      done(err)
 
-transpile = ->
-  src 'coffee/*.coffee'
-    .pipe coffee()
-    .pipe babel()
+cp = ->
+  src 'src/**/*.*'
+    .pipe dest 'dist'
+
+compile = (source, coffeeOp = {}) ->
+  source
+    .pipe coffee coffeeOp
+    # .pipe babel()
     .pipe uglifyOrThru()
-    .pipe dest 'dist/lib'
+    .pipe dest 'dist'
 
-# for test
-exports.dev = series transpile
+compileOther = ->
+  compile src ['coffee/*.coffee', '!coffee/options*', '!coffee/keyidentifiers.coffee']
 
-# for product
-exports.default = series transpile, zip
+compileMerged = ->
+  compile src(['coffee/optionsExtends.coffee', 'coffee/options.coffee']).pipe \
+    concat 'options.coffee'
+
+compileBare = ->
+  compile src(['coffee/keyidentifiers.coffee']),
+  "bare": true
+
+clean = (cb) -> del ['dist'], cb
+
+build = series(
+  clean
+  compileBare
+  compileMerged
+  compileOther
+  cp
+  zip
+)
+
+exports.default = exports.dev = build

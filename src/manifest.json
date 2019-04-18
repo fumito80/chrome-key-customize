@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
+  "version": "1.0",
+  "icons": {
+    "16": "images/toolbarIcon.png",
+    "128": "images/default.png"
+  },
+  "options_page": "options.html",
+  "background": {
+    "page": "background.html",
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": {
+      "19": "images/default.png",
+      "38": "images/default.png"
+    },
+    "default_title": "Shortcutware"
+  },
+  "web_accessible_resources": ["kbdagent.js"],
+  "content_security_policy": "script-src 'unsafe-eval' 'self'; object-src 'self';",
+  "permissions": [
+    "*://*/*",
+    "chrome://favicon/*",
+    "unlimitedStorage",
+    "storage",
+    "contextMenus",
+    "bookmarks",
+    "cookies",
+    "tabs",
+    "browsingData",
+    "history",
+    "notifications",
+    "nativeMessaging"
+  ]
+}

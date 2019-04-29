@@ -279,20 +279,21 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
           ), 0)
         when "clientOnKeyDown"
           setTimeout((->
-            if keynames = keyIdentifiers[andy.local.config.kbdtype][request.value1]
-              if request.value2
-                unless keyname = keynames[1]
-                  return
-                scCode = "04"
-              else
-                keyname = keynames[0]
-                scCode = "00"
-              for i in [0...keys.length]
-                if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
-                  scanCode = i
-                  break
-              if scanCode
-                execBatchMode(scCode + i)
+            # if keynames = keyIdentifiers[andy.local.config.kbdtype][request.value1]
+            keyname = request.value1
+            if request.value2
+              # unless keyname = keynames[1]
+              #   return
+              scCode = "04"
+            else
+              # keyname = keynames[0]
+              scCode = "00"
+            for i in [0...keys.length]
+              if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
+                scanCode = i
+                break
+            if scanCode
+              execBatchMode(scCode + i)
             doneCallback dfd, 0
           ), 0)
     catch e

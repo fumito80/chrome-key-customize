@@ -302,20 +302,21 @@ KeyConfigView = Backbone.View.extend
       @trigger "getConfigValue", "singleKey", container = {}
       unless container.result
         return
-    if keynames = keyIdentifiers[@kbdtype][event.originalEvent.keyIdentifier]
-      if event.originalEvent.shiftKey
-        unless keyname = keynames[1]
-          return
-        scCode = "04"
-      else
-        keyname = keynames[0]
-        scCode = "00"
-      for i in [0...keys.length]
-        if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
-          scanCode = i
-          break
-      if scanCode
-        @onKbdEvent(scCode + i)
+    # if keynames = keyIdentifiers[@kbdtype][event.originalEvent.key]
+    keyname = event.originalEvent.key
+    if event.originalEvent.shiftKey
+      # unless keyname = keynames[1]
+      #   return
+      scCode = "04"
+    else
+      # keyname = keynames[0]
+      scCode = "00"
+    for i in [0...keys.length]
+      if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
+        scanCode = i
+        break
+    if scanCode
+      @onKbdEvent(scCode + i)
 
   onClickCopySC: (event) ->
     if (mode = @model.get("mode")) is "through"
@@ -1057,20 +1058,21 @@ KeyConfigSetView = Backbone.View.extend
       return
     if (elActive = document.activeElement) && (elActive.tagName in ["TEXTAREA", "INPUT", "SELECT"])
       return
-    if keynames = keyIdentifiers[@model.get "kbdtype"][event.originalEvent.keyIdentifier]
-      if event.originalEvent.shiftKey
-        unless keyname = keynames[1]
-          return
-        scCode = "04"
-      else
-        keyname = keynames[0]
-        scCode = "00"
-      for i in [0...keys.length]
-        if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
-          scanCode = i
-          break
-      if scanCode
-        @onKbdEvent(scCode + i)
+    # if keynames = keyIdentifiers[@model.get "kbdtype"][event.originalEvent.key]
+    keyname = event.originalEvent.key
+    if event.originalEvent.shiftKey
+      # unless keyname = keynames[1]
+      #   return
+      scCode = "04"
+    else
+      # keyname = keynames[0]
+      scCode = "00"
+    for i in [0...keys.length]
+      if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
+        scanCode = i
+        break
+    if scanCode
+      @onKbdEvent(scCode + i)
 
   onClickAddKeyConfig: (event) ->
     if @$(".addnew").length > 0
@@ -1165,10 +1167,14 @@ KeyConfigSetView = Backbone.View.extend
     <thead>
       <tr>
         <th>
-          <div class="th_inner">Shortcut key [<i class="icon-arrow-right"></i> Dest key ]</div>
+          <div class="th_inner">Shortcut key</div>
         </th>
-        <th></th>
-        <th></th>
+        <th>
+          <div class="th_inner"><i class="icon-arrow-right"></i></div>
+        </th>
+        <th>
+          <div class="th_inner">Remap key</div>
+        </th>
         <th>
           <div class="th_inner options">Mode</div>
         </th>

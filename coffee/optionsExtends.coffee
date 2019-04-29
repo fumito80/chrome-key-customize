@@ -251,7 +251,7 @@ class SettingsView extends PopupBaseView
   onClickPaste: ->
     chrome.runtime.sendMessage
       action: "getClipboard"
-      (resp) ->
+      (resp) =>
         @$(".import").val resp.data
   onClickRestore: ->
     @$(".import").val JSON.stringify @lastSaveData
@@ -379,7 +379,7 @@ class CommandOptionsView extends ExplorerBaseView
     "click .tabs a"              : "onClickSwitchCoffee"
     PopupBaseView.prototype.events
   constructor: (options) ->
-    super()
+    super(options)
     @editer = CodeMirror.fromTextArea $(".content")[0],
       mode: "text/javascript"
       theme: "default"
@@ -396,7 +396,7 @@ class CommandOptionsView extends ExplorerBaseView
     @editer.on "change", =>
       @onStopDrag()
     @editer.lineAtHeight 18
-    super(options)
+    # super(options)
     @$(".content_outer").resizable
       minWidth: 650
       minHeight: 100
@@ -1062,7 +1062,7 @@ class CtxMenuManagerView extends ExplorerBaseView
     @disableButton ["newfolder"]
     @onClickRen event
   onKeydownCaption: (event) ->
-    if event.originalEvent.keyIdentifier is "F2"
+    if event.originalEvent.key is "F2"
       @onClickRen event
   onClickRen: (event) ->
     unless /title|menuCaption/.test (target$ = $(document.activeElement))[0].className
@@ -1097,10 +1097,10 @@ class CtxMenuManagerView extends ExplorerBaseView
     @onUpdateMenu null, null, @
     @onUpdateFolder null, null, @
   enableButton: (buttonClasses) ->
-    buttonClasses.forEach (className) ->
+    buttonClasses.forEach (className) =>
       @$("button." + className).removeClass("disabled").removeAttr("disabled")
   disableButton: (buttonClasses) ->
-    buttonClasses.forEach (className) ->
+    buttonClasses.forEach (className) =>
       @$("button." + className).addClass("disabled").attr("disabled", "disabled")
   onClickItem: (event) ->
     switch event.currentTarget.className

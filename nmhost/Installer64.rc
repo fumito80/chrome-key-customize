@@ -1,0 +1,3 @@
+AppExe   EXE  "flexkbd64.exe"
+AppDll   DLL  "flexkbd64_dll.dll"
+Manifest JSON "manifest64.json"

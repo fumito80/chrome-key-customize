@@ -74,7 +74,7 @@ transKbdEvent = (value) ->
 HeaderView = Backbone.View.extend
   scHelpUrl: "https://support.google.com/chrome/answer/157179?hl="
   # Backbone Buitin Events
-  el: "div.header"
+  el: "header"
   events:
     "click .addKeyConfig": "onClickAddKeyConfig"
     "click .ctxmgr"      : "onClickCtxmgr"
@@ -363,7 +363,7 @@ KeyConfigView = Backbone.View.extend
     false
 
   onClickMode: (event) ->
-    if event.currentTarget.getAttribute("title") is "Pause"
+    if event.currentTarget.getAttribute("title") is "Suspend"
       return
     if @$(".selectMode").toggle().is(":visible")
       @$(".selectMode").focus()
@@ -606,20 +606,22 @@ KeyConfigView = Backbone.View.extend
       .removeClass(@optionKeys.join(" "))
       .addClass mode
     if /remap/.test mode
-      @$("th:first,th:eq(1)").removeAttr("colspan").css("padding", "").find("i").show()
-      @$("th:eq(1),th:eq(2),th .origin").show().find("i").show()
+      @$("th:eq(1) > *, th:eq(2) > *").show()
+      # @$("th:first,th:eq(1)").removeAttr("colspan").css("padding", "").find("i").show()
+      # @$("th:eq(1),th:eq(2),th .origin").show().find("i").show()
     else
-      if @$el.hasClass "child"
-        @$("th:first").css("padding", "16px 0").find("i").hide()
-        @$("th .origin").hide()
-      else if @$el.hasClass "parent"
-        @$("th:first").removeAttr("colspan")
-        @$("th:eq(1),th:eq(2)").show()
-        @$("th:eq(1)").css("padding", "18px 0").find("i").hide()
-        @$("th .origin").hide()
-      else
-        @$("th:first").attr("colspan", "3")
-        @$("th:eq(1),th:eq(2)").hide()
+      @$("th:eq(1) > *, th:eq(2) > *").hide()
+      # if @$el.hasClass "child"
+      #   @$("th:first").css("padding", "16px 0").find("i").hide()
+      #   @$("th .origin").hide()
+      # else if @$el.hasClass "parent"
+      #   @$("th:first").removeAttr("colspan")
+      #   @$("th:eq(1),th:eq(2)").show()
+      #   @$("th:eq(1)").css("padding", "18px 0").find("i").hide()
+      #   @$("th .origin").hide()
+      # else
+      #   @$("th:first").attr("colspan", "3")
+      #   @$("th:eq(1),th:eq(2)").hide()
 
   setKbdValue: (input$, value) ->
     if value is "00768"
@@ -736,7 +738,7 @@ KeyConfigView = Backbone.View.extend
       <!--<div class="copySC"><i class="icon-copy"></i> Copy script</div>-->
       <div class="menuChangeIcon"></div>
       <span class="seprater 1st"><hr style="margin:3px 1px" noshade></span>
-      <div class="pause"><i class="icon-pause"></i> Pause</div>
+      <div class="pause"><i class="icon-pause"></i> Suspend</div>
       <div class="resume"><i class="icon-play"></i> Resume</div>
       <span class="seprater"><hr style="margin:3px 1px" noshade></span>
       <div class="delete"><i class="icon-trash"></i> Delete</div>
@@ -801,15 +803,15 @@ KeyConfigView = Backbone.View.extend
 
   template: _.template """
     <tr class="data">
-      <th>
+      <th class="thRemap">
         <div class="new" tabIndex="0"></div>
         <div class="grpbartop"></div>
         <div class="grpbarbtm"></div>
       </th>
-      <th>
+      <th class="thArrow">
         <i class="icon-arrow-right"></i>
       </th>
-      <th class="tdOrigin">
+      <th class="thOrigin">
         <div class="origin" tabIndex="-1"></div>
       </th>
       <td class="options">
@@ -872,9 +874,9 @@ KeyConfigSetView = Backbone.View.extend
           $(".header-background").addClass("scrolling")
           $(".scrollEnd").show()
         if @scrollTop + 120 > @scrollHeight - @offsetHeight
-          $(".footer").removeClass("scrolling")
+          $("footer").removeClass("scrolling")
         else
-          $(".footer").addClass("scrolling")
+          $("footer").addClass("scrolling")
           $(".scrollEnd").show()
       .niceScroll
         #cursorcolor: "#1E90FF"
@@ -1167,13 +1169,13 @@ KeyConfigSetView = Backbone.View.extend
     <thead>
       <tr>
         <th>
-          <div class="th_inner">Shortcut key</div>
+          <div class="th_inner">Mapped key</div>
         </th>
-        <th>
+        <th class="remap_arrow">
           <div class="th_inner"><i class="icon-arrow-right"></i></div>
         </th>
         <th>
-          <div class="th_inner">Remap key</div>
+          <div class="th_inner">Origin key</div>
         </th>
         <th>
           <div class="th_inner options">Mode</div>
@@ -1224,7 +1226,7 @@ windowOnResize = ->
   if resizeTimer
     clearTimeout resizeTimer
   resizeTimer = setTimeout((->
-    tableHeight = window.innerHeight - document.querySelector(".header").offsetHeight - marginBottom
+    tableHeight = window.innerHeight - document.querySelector("header").offsetHeight - marginBottom
     document.querySelector(".fixed-table-container").style.height = tableHeight + "px"
     $(".fixed-table-container-inner").getNiceScroll().resize()
     $(".result_outer").getNiceScroll().resize()
@@ -1318,7 +1320,7 @@ $ ->
 
   scrollContainer = $(".fixed-table-container-inner")[0]
   if (scrollContainer.scrollHeight - scrollContainer.offsetHeight) > 40
-    $(".footer").addClass("scrolling")
+    $("footer").addClass("scrolling")
     $(".scrollEnd").show()
 
   Backbone.history.start pushState: false

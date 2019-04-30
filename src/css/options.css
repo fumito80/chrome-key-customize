@@ -22,7 +22,7 @@ body input[type="text"], body input[type="number"] {
   border-radius: 1px;
   box-shadow: none;
 }
-.header {
+header {
   position: fixed;
   width: 100%;
   height: 45px;
@@ -33,6 +33,39 @@ body input[type="text"], body input[type="number"] {
   background: -webkit-gradient(linear, center bottom, center top, from(#F6F6F6), to(#BDCFD2));
   /* box-shadow: 0 0 7px #666; */
   z-index: 1;
+}
+header .h1 {
+  font: 22px 'Subway Black', Arial;
+  line-height: 1.8em;
+  font-weight: normal;
+  color: #9CB1C7;
+}
+header .amp {
+  padding: 0 0 0 7px;
+}
+header .title2 {
+  color: #9CB1C7;
+  margin: 0;
+  border-radius: 1px;
+}
+header .h1 div {
+  line-height: 1.0em;
+}
+header a {
+  display: none;
+}
+footer {
+  height: 10px;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: none;
+}
+footer.scrolling {
+  box-shadow: 0 -7px 4px -4px #666 inset;
 }
 .scrollEnd {
   position: absolute;
@@ -53,36 +86,6 @@ body input[type="text"], body input[type="number"] {
 }
 .scrollEnd i:hover {
   color: #000;
-}
-.footer {
-  height: 10px;
-  position: fixed;
-  width: 100%;
-  left: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 2;
-  box-shadow: none;
-}
-.footer.scrolling {
-  box-shadow: 0 -7px 4px -4px #666 inset;
-}
-.header .h1 {
-  font: 22px 'Subway Black', Arial;
-  line-height: 1.8em;
-  font-weight: normal;
-  color: #9CB1C7;
-}
-.header .amp {
-  padding: 0 0 0 7px;
-}
-.header .title2 {
-  color: #9CB1C7;
-  margin: 0;
-  border-radius: 1px;
-}
-.header .h1 div {
-  line-height: 1.0em;
 }
 .beta {
   font: 18px 'Noto Sans', Arial;
@@ -106,9 +109,6 @@ body input[type="text"], body input[type="number"] {
 .scHelp, .helpview {
   margin: 8px;
   float: right;
-  display: none;
-}
-.header a {
   display: none;
 }
 .keyConfigSetView {
@@ -145,6 +145,9 @@ body input[type="text"], body input[type="number"] {
 tbody .data:hover {
   background: lavender;
 }
+th.remap_arrow {
+  padding: 3px 5px;
+}
 .th_inner {
   position: absolute;
   top: -1px;
@@ -152,16 +155,14 @@ tbody .data:hover {
   padding-top: 17px;
   background-color: #F6F6F6;
 }
-.keyConfigSetView .th_inner.options {
+.th_inner.options {
   padding-left: 6px;
 }
-.keyConfigSetView .th_inner.desc {
+.th_inner.desc {
   padding-left: 0;
 }
 .new, .origin {
-  /* color: #518BAB; */
   color: #000000;
-  min-width: 80px;
   white-space: nowrap;
   font: 1.2em 'Arial';
   outline: 0;
@@ -292,9 +293,6 @@ div.mode.selecting .icon-caret-down {
 i.icon-arrow-right {
   color: #518BAB;
 }
-thead th i.icon-arrow-right {
-  margin: 2px;
-}
 .keyConfigSetView thead tr {
   border: hidden;
 }
@@ -303,7 +301,7 @@ thead th i.icon-arrow-right {
   padding: 4px 5px;
 }
 .keyConfigSetView th.ctxmenu, .keyConfigSetView td.ctxmenu {
-  padding: 4px 0;
+  padding: 3px 0 4px 0;
 }
 .keyConfigSetView .border td {
   padding: 0;
@@ -312,8 +310,16 @@ thead th i.icon-arrow-right {
   border-top: 1px dotted #999999;
   padding: 0;
 }
-.keyConfigSetView .tdOrigin {
-  padding-right: 12px;
+.keyConfigSetView .thRemap {
+  width: 80px;
+  white-space: nowrap;
+}
+.keyConfigSetView .thArrow {
+  width: 20px;
+}
+.keyConfigSetView .thOrigin {
+  width: 80px;
+  height: 32px;
   white-space: nowrap;
 }
 .keyConfigSetView tbody .desc {
@@ -326,7 +332,7 @@ thead th i.icon-arrow-right {
   border-radius: 3px;
   color: white;
   padding: 0 3px;
-  margin-top: 2px;
+  margin-top: 0px;
   margin-right: 3px;
   font-size: 12px;
   height: 17px;
@@ -449,7 +455,7 @@ button.cog.selecting {
   -webkit-padding-start: 20px;
   background-repeat: no-repeat;
   background-size: 16px;
-  background-position-y: 2px;
+  background-position-y: 1px;
 }
 .keyConfigSetView .caption {
   color: #000000;
@@ -803,7 +809,7 @@ button.cog.selecting {
   color: #FFF;
   background: #1E90FF; /*#158D8D*/
   border-radius: 3px;
-  margin-top: 3px;
+  margin-top: 0px;
   text-align: center;
   /*padding-top: 2px;*/
   font-size: 0.9em;

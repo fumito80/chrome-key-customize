@@ -1,8 +1,15 @@
+pipe = (fn, fns...) -> (a) -> fns.reduce ((acc, fn2) -> fn2(acc)), fn(a)
+F =
+  map: (f) -> (a) -> a.map f
+  filter: (f) -> (a) -> a.filter f
+  find: (f) -> (a) -> a.find f
+  findIndex: (f) -> (a) -> a.findIndex f
+
 gCurrentTabId = null
 userData = {}
 undoData = {}
 jsTransCodes = {}
-defaultSleep = 100
+defaultSleep = 200
 nmhNameAndArch = null
 
 notifIcons =
@@ -25,23 +32,12 @@ notifIcons =
 
 chrome.browserAction.onClicked.addListener ->
   getActiveTab().done (tab, windowId) ->
-    re = new RegExp("chrome-extension://#{chrome.runtime.id}/options.html")
-    if re.test tab.url
+    if tab.url.startsWith "chrome-extension://#{chrome.runtime.id}/options.html"
       sendMessage
         action: "kbdEvent"
         value: "00768"
     else
       execBatchMode "00768"
-  return
-  chrome.tabs.query {}, (tabs) ->
-    re = new RegExp("chrome-extension://#{chrome.runtime.id}/options.html")
-    for i in [0...tabs.length]
-      if re.test tabs[i].url
-        chrome.tabs.update tabs[i].id, active: true
-        chrome.windows.update tabs[i].windowId, focused: true
-        return
-    chrome.tabs.create
-      url: "options.html"
 
 nmhPort = null
 postNMH = (command, prm1, prm2, test) ->
@@ -66,8 +62,8 @@ postNMH = (command, prm1, prm2, test) ->
             if keyConfigSet = andy.local.keyConfigSet
               setConfigPlugin keyConfigSet, andy.local.config.wheelSwitches
               createCtxMenus()
-              for i in [0...keyConfigSet.length]
-                if (item = keyConfigSet[i]).mode is "command" && item.command.name is "execJS" && item.command.coffee
+              keyConfigSet.forEach (item) ->
+                if item.mode is "command" && item.command.name is "execJS" && item.command.coffee
                   andy.coffee2JS item.new, item.command.content
             andy.local.config.version = msg.value
             console.log "app started"
@@ -118,51 +114,35 @@ tabStateNotifier =
     else
       @completes[tabId] = true
 
-modifierInits = ["c", "a", "s", "w"]
-transKbdEvent = (value, kbdtype) ->
-  keys = andy.getKeyCodes()[kbdtype].keys
-  modifiers = parseInt(value.substring(0, 2), 16)
-  keyCombo = []
-  for i in [0...modifierInits.length]
-    keyCombo.push modifierInits[i] if modifiers & Math.pow(2, i)
-  scanCode = value.substring(2)
-  keyIdenfiers = keys[scanCode]
-  "[" + keyCombo.join("") + "]" + keyIdenfiers[0]
-
 jsCtxData = ""
 execCtxMenu = (info) ->
   jsCtxData = "scd.ctxData = '" + (info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl || "").replace(/'/g, "\\'") + "';"
-  for i in [0...andy.local.keyConfigSet.length]
-    if (keyConfig = andy.local.keyConfigSet[i]).new is info.menuItemId
-      execBatchMode keyConfig.new
-      break
+  keyConfig = andy.local.keyConfigSet.find (item) -> item.new is info.menuItemId
+  execBatchMode keyConfig.new if keyConfig
 
 chrome.contextMenus.onClicked.addListener (info, tab) ->
   execCtxMenu info
 
-execShortcut = (dfd, doneCallback, transCode, scCode, sleepMSec, execMode, batchIndex) ->
+getScanCode = (keyName) ->
+  kbdtype = andy.local.config.kbdtype
+  { keys } = andy.getKeyCodes()[kbdtype]
+  keys.findIndex ([unshift, shift]) -> keyName is unshift || keyName is shift
+
+execShortcut = (dfd, cbDone, transCode, scCode, sleepMSec, execMode, batchIndex) ->
   if transCode
-    #scCode = ""
-    modifiersCode = 0
-    test = transCode.match(/\[(\w*?)\](.+)/)
+    [test, modifiers, keyIdentifier] = transCode.exec(/\[(\w*?)\](.+)/) || [false]
     if (test)
-      modifiers = RegExp.$1
-      keyIdentifier = RegExp.$2
-      modifierChars = modifiers.toLowerCase().split("")
-      if ("c" in modifierChars) then modifiersCode  = 1
-      if ("a" in modifierChars) then modifiersCode += 2
-      if ("s" in modifierChars) then modifiersCode += 4
-      if ("w" in modifierChars) then modifiersCode += 8
+      modifiersCode = modifiers.toLowerCase().split("").reduce (acc, c) ->
+        return acc + 1 if c is "c"
+        return acc + 2 if c is "a"
+        return acc + 4 if c is "s"
+        return acc + 8 if c is "w"
+        return acc
+      , 0
     else
       modifiersCode = 0
-      keyIdentifier = transCode
-    kbdtype = andy.local.config.kbdtype
-    keys = andy.getKeyCodes()[kbdtype].keys
-    scanCode = -1
-    for i in [0...keys.length]
-      if keys[i] && (keyIdentifier is keys[i][0] || keyIdentifier is keys[i][1])
-        scanCode = i
-        break
+      keyIdentifier = transCode    
+    scanCode = getScanCode keyIdentifier
     if scanCode is -1
       throw new Error "Key identifier code '" + keyIdentifier + "' is unregistered code."
     else
@@ -174,37 +154,32 @@ execShortcut = (dfd, doneCallback, transCode, scCode, sleepMSec, execMode, batch
     throw new Error "Command argument is not found."
     return
 
-  unless execMode
-    for i in [0...andy.local.keyConfigSet.length]
-      if (item = andy.local.keyConfigSet[i]).new is scCode
-        execMode = item.mode
-        break
-  switch execMode
+  switch execMode || (andy.local.keyConfigSet.find (item) -> item.new is scCode).mode
     when "command"
       execCommand(scCode).done ->
-        doneCallback dfd, sleepMSec, batchIndex
+        cbDone dfd, sleepMSec, batchIndex
     when "bookmark"
       preOpenBookmark(scCode).done (tabId) ->
         if tabId
           tabStateNotifier.register tabId, ->
-            doneCallback dfd, sleepMSec, batchIndex
+            cbDone dfd, sleepMSec, batchIndex
         else
-          doneCallback dfd, sleepMSec, batchIndex
+          cbDone dfd, sleepMSec, batchIndex
     when "keydown"
       setTimeout((->
         postNMH "CallShortcut", scCode, 8
-        doneCallback dfd, sleepMSec, batchIndex
+        cbDone dfd, sleepMSec, batchIndex
       ), 0)
     else
       setTimeout((->
         postNMH "CallShortcut", scCode, 4
-        doneCallback dfd, sleepMSec, batchIndex
+        cbDone dfd, sleepMSec, batchIndex
       ), 0)
 
 dfdCommandQueue = $.Deferred().resolve()
 
 chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
-  doneCallback = (dfd, sleepMSec) ->
+  cbDone = (dfd, sleepMSec) ->
     #postNMH "Sleep", sleepMSec if sleepMSec > 0
     #sendResponse msg: "done"
     #dfd.resolve()
@@ -222,18 +197,18 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
     try
       switch request.action
         when "callShortcut"
-          execShortcut dfd, doneCallback, request.value1, null, request.value2
+          execShortcut dfd, cbDone, request.value1, null, request.value2
         when "keydown"
-          execShortcut dfd, doneCallback, request.value1, null, request.value2, "keydown"
+          execShortcut dfd, cbDone, request.value1, null, request.value2, "keydown"
         when "sleep"
           setTimeout((->
             #postNMH "Sleep", request.value1
-            doneCallback dfd, 0
+            cbDone dfd, 0
           ), request.value1)
         when "setData"
           setTimeout((->
             userData[request.value1] = request.value2
-            doneCallback dfd, 0
+            cbDone dfd, 0
           ), 0)
         when "getData"
           setTimeout((->
@@ -242,7 +217,7 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
           ), 0)
         when "getTabInfo"
           chrome.tabs.get request.value1, (tab) ->
-            chrome.windows.get tab.windowId, {populate: true}, (win) ->
+            chrome.windows.get tab.windowId, { populate: true }, (win) ->
               tab.tabCount = win.tabs.length
               tab.focused = win.focused
               tab.windowState = win.state
@@ -252,49 +227,40 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
         when "setClipboard"
           setTimeout((->
             postNMH "SetClipboard", request.value1
-            doneCallback dfd, 0
+            cbDone dfd, 0
           ), 0)
         when "getClipboard"
           setTimeout((->
             flexkbd.getClipboard sendResponse, dfd
           ), 0)
         when "showNotification"
-          showNotification dfd, doneCallback, request.value1, request.value2, request.value3, request.value4
+          showNotification dfd, cbDone, request.value1, request.value2, request.value3, request.value4
         when "openUrl"
           params = request.value1
           preOpenBookmark(null, params).done (tabId) ->
             if tabId && params.noActivate
               gCurrentTabId = tabId
               tabStateNotifier.callComplete params.commandId
-            doneCallback dfd, 0
+            cbDone dfd, 0
         when "execShell"
           setTimeout((->
             postNMH "ExecUrl", request.value1, request.value2
-            doneCallback dfd, 0
+            cbDone dfd, 0
           ), 0)
         when "clearActiveTab"
           setTimeout((->
             gCurrentTabId = null
-            doneCallback dfd, 0
+            cbDone dfd, 0
           ), 0)
         when "clientOnKeyDown"
+          console.log request.value1
           setTimeout((->
-            # if keynames = keyIdentifiers[andy.local.config.kbdtype][request.value1]
             keyname = request.value1
-            if request.value2
-              # unless keyname = keynames[1]
-              #   return
-              scCode = "04"
-            else
-              # keyname = keynames[0]
-              scCode = "00"
-            for i in [0...keys.length]
-              if keys[i] && (keyname is keys[i][0] || keyname is keys[i][1])
-                scanCode = i
-                break
-            if scanCode
-              execBatchMode(scCode + i)
-            doneCallback dfd, 0
+            scCode = if request.value2 then "04" else "00"
+            scanCode = getScanCode keyname
+            if scanCode > 0
+              execBatchMode(scCode + scanCode)
+            cbDone dfd, 0
           ), 0)
     catch e
       setTimeout((->
@@ -304,28 +270,27 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
       dfd.promise()
   true
 
-jsUtilObj = """var e,t,scd;e=function(){function e(e){this.error=e}return e.prototype.done=function(e){return this},e.prototype.fail=function(e){return e(new Error(this.error)),this},e}(),t=function(){function e(){}return e.prototype.done=function(e){return this.doneCallback=e,this},e.prototype.fail=function(e){return this.failCallback=e,this},e.prototype.sendMessage=function(e,t,n,r,i){var s=this;return chrome.runtime.sendMessage({action:e,value1:t,value2:n,value3:r,value4:i},function(e){var t;if((e!=null?e.msg:void 0)==="done"){if(t=s.doneCallback)return setTimeout(function(){return t(e.data||e.msg)},0)}else if(t=s.failCallback)return setTimeout(function(){return t(e.msg)},0)}),this},e}(),scd={batch:function(n){return n instanceof Array?(new t).sendMessage("batch",n):new e("Argument is not Array.")},send:function(n,r){var i;i=100;if(r!=null){if(isNaN(i=r))return new e(r+" is not a number.");i=Math.round(r);if(i<0||i>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}return(new t).sendMessage("callShortcut",n,i)},keydown:function(n,r){var i;i=100;if(r!=null){if(isNaN(i=r))return new e(r+" is not a number.");i=Math.round(r);if(i<0||i>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}return(new t).sendMessage("keydown",n,i)},sleep:function(n){if(n!=null){if(isNaN(n))return new e(n+" is not a number.");n=Math.round(n);if(n<0||n>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}else n=100;return(new t).sendMessage("sleep",n)},setClipbd:function(e){return(new t).sendMessage("setClipboard",e)},getClipbd:function(){return(new t).sendMessage("getClipboard")},showNotify:function(e,n,r,i){return e==null&&(e=""),n==null&&(n=""),r==null&&(r="none"),i==null&&(i=!1),(new t).sendMessage("showNotification",e,n,r,i)},returnValue:{},cancel:function(){return this.returnValue.cancel=!0},openUrl:function(e,n,r,i){var s,o,u;return n&&(s=(new Date).getTime()),r&&(o=!0),u={url:e,noActivate:n,findStr:r,findtab:o,openmode:i,commandId:s},(new t).sendMessage("openUrl",u),this.returnValue.cid=s},execShell:function(e,n){if(e)return(new t).sendMessage("execShell",e,n)},clearCurrentTab:function(){return(new t).sendMessage("clearCurrentTab")},getSelection:function(){var e,t,n,r;n="";if(e=document.activeElement){if((r=e.nodeName)==="TEXTAREA"||r==="INPUT")return n=e.value.substring(e.selectionStart,e.selectionEnd);if((t=window.getSelection()).type==="Range")return n=t.getRangeAt(0).toString()}},setData:function(e,n){return(new t).sendMessage("setData",e,n)},getData:function(e){return(new t).sendMessage("getData",e)},getTabInfo:function(){return(new t).sendMessage("getTabInfo",this.tabId)}};"""
+jsUtilObj = """var e,t,scd;e=function(){function e(e){this.error=e}return e.prototype.done=function(e){return this},e.prototype.fail=function(e){return e(new Error(this.error)),this},e}(),t=function(){function e(){}return e.prototype.done=function(e){return this.cbDone=e,this},e.prototype.fail=function(e){return this.cbFail=e,this},e.prototype.sendMessage=function(e,t,n,r,i){var s=this;return chrome.runtime.sendMessage({action:e,value1:t,value2:n,value3:r,value4:i},function(e){var t;if((e!=null?e.msg:void 0)==="done"){if(t=s.cbDone)return setTimeout(function(){return t(e.data||e.msg)},0)}else if(t=s.cbFail)return setTimeout(function(){return t(e.msg)},0)}),this},e}(),scd={batch:function(n){return n instanceof Array?(new t).sendMessage("batch",n):new e("Argument is not Array.")},send:function(n,r){var i;i=100;if(r!=null){if(isNaN(i=r))return new e(r+" is not a number.");i=Math.round(r);if(i<0||i>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}return(new t).sendMessage("callShortcut",n,i)},keydown:function(n,r){var i;i=100;if(r!=null){if(isNaN(i=r))return new e(r+" is not a number.");i=Math.round(r);if(i<0||i>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}return(new t).sendMessage("keydown",n,i)},sleep:function(n){if(n!=null){if(isNaN(n))return new e(n+" is not a number.");n=Math.round(n);if(n<0||n>6e3)return new e("Range of Sleep millisecond is up to 6000-0.")}else n=100;return(new t).sendMessage("sleep",n)},setClipbd:function(e){return(new t).sendMessage("setClipboard",e)},getClipbd:function(){return(new t).sendMessage("getClipboard")},showNotify:function(e,n,r,i){return e==null&&(e=""),n==null&&(n=""),r==null&&(r="none"),i==null&&(i=!1),(new t).sendMessage("showNotification",e,n,r,i)},returnValue:{},cancel:function(){return this.returnValue.cancel=!0},openUrl:function(e,n,r,i){var s,o,u;return n&&(s=(new Date).getTime()),r&&(o=!0),u={url:e,noActivate:n,findStr:r,findtab:o,openmode:i,commandId:s},(new t).sendMessage("openUrl",u),this.returnValue.cid=s},execShell:function(e,n){if(e)return(new t).sendMessage("execShell",e,n)},clearCurrentTab:function(){return(new t).sendMessage("clearCurrentTab")},getSelection:function(){var e,t,n,r;n="";if(e=document.activeElement){if((r=e.nodeName)==="TEXTAREA"||r==="INPUT")return n=e.value.substring(e.selectionStart,e.selectionEnd);if((t=window.getSelection()).type==="Range")return n=t.getRangeAt(0).toString()}},setData:function(e,n){return(new t).sendMessage("setData",e,n)},getData:function(e){return(new t).sendMessage("getData",e)},getTabInfo:function(){return(new t).sendMessage("getTabInfo",this.tabId)}};"""
 
 sendMessage = (message) ->
   getActiveTab().done (tab, windowId) ->
     chrome.tabs.sendMessage tab.id, message
 
-getActiveTab = (execJS) ->
+getActiveTab = ->
   dfd = $.Deferred()
   #console.log(gCurrentTabId)
-  if gCurrentTabId #&& execJS
+  if gCurrentTabId
     chrome.tabs.query {}, (tabs) ->
-      for i in [0...tabs.length]
-        if tabFound = (currentTab = tabs[i]).id is gCurrentTabId
-          break
-      if tabFound
-        dfd.resolve currentTab, currentTab.windowId
-      else
-        chrome.tabs.query {active: true, currentWindow: true}, (tabs) ->
-          dfd.resolve tabs[0], tabs[0]?.windowId
+      currentTab = tabs.find tab -> tab.id is gCurrentTabId
+      unless currentTab
+        currentTab = tabs.find tab -> tab.active
+      dfd.resolve currentTab, currentTab.windowId
   else
-    chrome.tabs.query {active: true, currentWindow: true}, (tabs) ->
-      dfd.resolve tabs[0], tabs[0]?.windowId
+    chrome.tabs.query { active: true, currentWindow: true }, ([tab]) ->
+      if tab
+        dfd.resolve tab, tab.windowId
+      else
+        dfd.reject()
   dfd.promise()
 
 getWindowTabs = (options) ->
@@ -361,7 +326,7 @@ chrome.tabs.onActivated.addListener (activeInfo) ->
           unless resp is "hello"
             chrome.tabs.executeScript tab.id,
               file: "kbdagent.js"
-              allFrames: true
+              allFrames: false
               runAt: "document_end"
 
 chrome.windows.onFocusChanged.addListener (windowId) ->
@@ -398,27 +363,24 @@ chrome.tabs.onUpdated.addListener (tabId, changeInfo, tab) ->
           unless resp is "hello"
             chrome.tabs.executeScript tab.id,
               file: "kbdagent.js"
-              allFrames: true
+              allFrames: false
               runAt: "document_end"
 
 execBatchMode = (scCode) ->
   #console.log scCode
   gCurrentTabId = null
-  doneCallback = (dfd, sleepMSec, batchIndex) ->
+  cbDone = (dfd, sleepMSec, batchIndex) ->
     #postNMH "Sleep", sleepMSec if sleepMSec > 0
     setTimeout((->
       dfd.resolve(batchIndex + 1)
     ), sleepMSec)
-  keyConfigs = []
-  andy.local.keyConfigSet.forEach (keyConfig) ->
-    if keyConfig.new is scCode || keyConfig.parentId is scCode
-      keyConfigs.push keyConfig
+  keyConfigs = andy.local.keyConfigSet.filter (item) -> item.new is scCode || item.parentId is scCode
   # execute
   (dfdBatchQueue = dfdKicker = $.Deferred()).promise()
   dfdBatchQueue = dfdBatchQueue.then ->
     dfd = $.Deferred()
     setTimeout((->
-      doneCallback dfd, 0, -1
+      cbDone dfd, 0, -1
     ), 0)
     dfd.promise()
   for i in [0...keyConfigs.length]
@@ -433,35 +395,32 @@ execBatchMode = (scCode) ->
         keyConfig = keyConfigs[batchIndex]
         switch keyConfig.mode
           when "remap"
-            execShortcut dfd, doneCallback, null, keyConfig.origin, defaultSleep, "keydown", batchIndex
+            execShortcut dfd, cbDone, null, keyConfig.origin, defaultSleep, "keydown", batchIndex
           when "command"
             execCommand(keyConfig.new).done (results) ->
-              if results
-                for i in [0...results.length]
-                  if commandId = results[i]?.cid
-                    break
-                  else if cancel = results[i]?.cancel
-                    break
-              if cancel
-                #throw new Error "Command canceled"
-                dfd.reject()
-              else
-                if commandId
-                  tabStateNotifier.register commandId, ->
-                    doneCallback dfd, 0, batchIndex
+              if results.length > 0
+                { cid, cancel } = results.find((result) -> result?.cid || result?.cancel) || { cid: null, cancel: null }
+                if cancel
+                  #throw new Error "Command canceled"
+                  dfd.reject()
+                else if cid
+                  tabStateNotifier.register cid, ->
+                    cbDone dfd, 0, batchIndex
                 else
-                  doneCallback dfd, 0, batchIndex
+                  cbDone dfd, 0, batchIndex
+              else
+                cbDone dfd, 0, batchIndex
           when "sleep"
             setTimeout((->
               #postNMH "Sleep", ~~keyConfig.sleep
-              doneCallback dfd, 0, batchIndex
+              cbDone dfd, 0, batchIndex
             ), ~~keyConfig.sleep)
           when "comment", "through"
             setTimeout((->
-              doneCallback dfd, 0, batchIndex
+              cbDone dfd, 0, batchIndex
             ), 0)
           else
-            execShortcut dfd, doneCallback, null, keyConfig.new, defaultSleep, keyConfig.mode, batchIndex
+            execShortcut dfd, cbDone, null, keyConfig.new, defaultSleep, keyConfig.mode, batchIndex
       catch e
         setTimeout((->
           dfd.reject()
@@ -473,7 +432,7 @@ execBatchMode = (scCode) ->
 notifications = {}
 notifications.state = "closed"
 
-createNotification = (dfd, doneCallback, title, message, icon, newNotif) ->
+createNotification = (dfd, cbDone, title, message, icon, newNotif) ->
   if newNotif
     id = "s" + (new Date).getTime()
   else
@@ -489,14 +448,14 @@ createNotification = (dfd, doneCallback, title, message, icon, newNotif) ->
     ->
       notifications.state = "opened"
       dfd.resolve()
-      #doneCallback dfd, 0
+      #cbDone dfd, 0
 
-showNotification = (dfd, doneCallback, title, message, icon, newNotif) ->
+showNotification = (dfd, cbDone, title, message, icon, newNotif) ->
   if notifications.state is "opened" && !newNotif
     chrome.notifications.clear chrome.runtime.id, ->
-      createNotification(dfd, doneCallback, title, message, icon, newNotif)
+      createNotification(dfd, cbDone, title, message, icon, newNotif)
   else
-    createNotification(dfd, doneCallback, title, message, icon, newNotif)
+    createNotification(dfd, cbDone, title, message, icon, newNotif)
 
 UnescapeUTF8 = (str) ->
   str.replace /%(E(0%[AB]|[1-CEF]%[89AB]|D%[89])[0-9A-F]|C[2-9A-F]|D[0-9A-F])%[89AB][0-9A-F]|%[0-7][0-9A-F]/ig, (s) ->
@@ -518,7 +477,7 @@ openBookmark = (dfd, openmode = "last", url, noActivate = false) ->
           newIndex = Math.max 0, tab.index
         else if openmode is "right"
           newIndex = tab.index + 1
-        chrome.tabs.create {url: url, index: newIndex, active: !noActivate}, (tab) -> dfd.resolve(tab.id)
+        chrome.tabs.create { url: url, index: newIndex, active: !noActivate }, (tab) -> dfd.resolve(tab.id)
     when "current"
       getActiveTab().done (tab, windowId) ->
         tabStateNotifier.reset(tab.id)
@@ -528,65 +487,55 @@ openBookmark = (dfd, openmode = "last", url, noActivate = false) ->
            code: code
            runAt: "document_end"
         else
-          chrome.tabs.update tab.id, {url: url, active: !noActivate}, (tab) -> dfd.resolve(tab.id)
+          chrome.tabs.update tab.id, { url: url, active: !noActivate }, (tab) -> dfd.resolve(tab.id)
     when "newwin"
-      chrome.windows.create {url: url, focused: !noActivate}, (win) -> dfd.resolve(win.tabs[0].id)
+      chrome.windows.create { url: url, focused: !noActivate }, (win) -> dfd.resolve(win.tabs[0].id)
     when "incognito"
-      chrome.windows.create {url: url, focused: !noActivate, incognito: true}, (win) -> dfd.resolve(win?.tabs[0].id)
+      chrome.windows.create { url: url, focused: !noActivate, incognito: true }, (win) -> dfd.resolve(win?.tabs[0].id)
     when "panel"
-      chrome.windows.create {url: url, focused: !noActivate, "type": "detached_panel"}, (win) -> dfd.resolve(win.tabs[0].id)
+      chrome.windows.create { url: url, focused: !noActivate, "type": "detached_panel" }, (win) -> dfd.resolve(win.tabs[0].id)
     else #findonly
       setTimeout (-> dfd.resolve()), 0
 
 preOpenBookmark = (keyEvent, params) ->
   dfd = $.Deferred()
-  for i in [0...andy.local.keyConfigSet.length]
-    item = andy.local.keyConfigSet[i]
-    if item.new is keyEvent || params
-      unless params
-        params = item.bookmark
-      {openmode, url, findtab, findStr, noActivate} = params
-      if findtab || openmode is "findonly"
-        getActiveTab().done (activeTab) ->
-          getAllTabs().done (tabs) ->
-            currentPos = 0
-            for i in [0...tabs.length]
-              if tabs[i].id is activeTab.id
-                currentPos = i
-                break
-            orderedTabs = []
-            if 0 < currentPos < (tabs.length - 1)
-              orderedTabs = tabs.slice(currentPos + 1).concat tabs.slice(0, currentPos + 1)
-            else
-              orderedTabs = tabs
-            found = false
-            for i in [0...orderedTabs.length]
-              unless (orderedTabs[i].title + orderedTabs[i].url).indexOf(findStr) is -1
-                if noActivate
-                  dfd.resolve orderedTabs[i].id
-                else
-                  chrome.tabs.update orderedTabs[i].id, {active: true}, ->
-                    chrome.windows.update orderedTabs[i].windowId, {focused: true}, ->
-                      dfd.resolve()
-                found = true
-                break
-            unless found
-              openBookmark(dfd, openmode, url, noActivate)
-      else
-        openBookmark(dfd, openmode, url, noActivate)
-      break
+
+  { openmode, url, findtab, findStr, noActivate } = params ||
+    (andy.local.keyConfigSet.find (keyConfig) -> keyConfig.new is keyEvent).bookmark
+
+  if findtab || openmode is "findonly"
+    getAllTabs().done (allTabs) ->
+      getActiveTab().done pipe(
+        (activeTab) -> allTabs.findIndex (tab) -> tab.id is activeTab.id
+        (index) -> allTabs.slice(index + 1).concat allTabs.slice(0, index + 1)
+        F.find (tab) -> (tab.title + tab.url).indexOf(findStr) >= 0
+        (targetTab) ->
+          if targetTab and noActivate
+            dfd.resolve targetTab.id
+          else if targetTab
+            chrome.tabs.update targetTab.id, { active: true }, ->
+              chrome.windows.update targetTab.windowId, { focused: true }, ->
+                dfd.resolve()
+          else unless openmode is "findonly"
+            openBookmark(dfd, openmode, url, noActivate)
+          else
+            dfd.resolve()
+      )
+  else
+    openBookmark(dfd, openmode, url, noActivate)
+    
   dfd.promise()
 
 removeCookie = (dfd, removeSpecs, index) ->
   if removeSpec = removeSpecs[index]
-    chrome.cookies.remove {"url": removeSpec.url, "name": removeSpec.name}, ->
+    chrome.cookies.remove { "url": removeSpec.url, "name": removeSpec.name }, ->
       removeCookie dfd, removeSpecs, index + 1
   else
     dfd.resolve()
 
 deleteHistory = (dfd, deleteUrls, index) ->
   if url = deleteUrls[index]
-    chrome.history.deleteUrl {url: url}, ->
+    chrome.history.deleteUrl { url: url }, ->
       deleteHistory dfd, deleteUrls, index + 1
   else
     dfd.resolve()
@@ -602,7 +551,7 @@ closeWindow = (dfd, windows, index) ->
     dfd.resolve()
 
 closeTabs = (dfd, fnWhere) ->
-  getWindowTabs({active: false, currentWindow: true, windowType: "normal"}, fnWhere)
+  getWindowTabs({ active: false, currentWindow: true, windowType: "normal" }, fnWhere)
     .done (tabs) ->
       tabIds = []
       tabs.forEach (tab) ->
@@ -653,45 +602,43 @@ execCommand = (keyEvent) ->
             else
               newpos = newpos - 1
             if newpos > -1
-              chrome.tabs.move tab.id, {windowId: windowId, index: newpos}, -> dfd.resolve()
+              chrome.tabs.move tab.id, { windowId: windowId, index: newpos }, -> dfd.resolve()
             else
               dfd.resolve()
         when "moveTabFirst"
           getActiveTab().done (tab, windowId) ->
-            chrome.tabs.move tab.id, {windowId: windowId, index: 0}, -> dfd.resolve()
+            chrome.tabs.move tab.id, { windowId: windowId, index: 0 }, -> dfd.resolve()
         when "moveTabLast"
           getActiveTab().done (tab, windowId) ->
-            chrome.tabs.move tab.id, {windowId: windowId, index: 1000}, -> dfd.resolve()
+            chrome.tabs.move tab.id, { windowId: windowId, index: 1000 }, -> dfd.resolve()
         when "detachTab"
           getActiveTab().done (tab, windowId) ->
-            chrome.windows.create {tabId: tab.id, focused: true, type: "normal"}, -> dfd.resolve()
+            chrome.windows.create { tabId: tab.id, focused: true, type: "normal" }, -> dfd.resolve()
         when "detachPanel"
           getActiveTab().done (tab, windowId) ->
-            chrome.windows.create {tabId: tab.id, focused: true, type: "detached_panel"}, -> dfd.resolve()
+            chrome.windows.create { tabId: tab.id, focused: true, type: "panel" }, -> dfd.resolve()
         when "detachSecret"
           getActiveTab().done (tab, windowId) ->
-            chrome.windows.create {tabId: tab.id, focused: true, incognito: true}, -> dfd.resolve()
+            chrome.windows.create { tabId: tab.id, focused: true, incognito: true }, -> dfd.resolve()
         when "attachTab"
           getActiveTab().done (tab, windowId) ->
-            chrome.windows.getAll {populate: true}, (windows) ->
-              for i in [0...windows.length]
-                for j in [0...windows[i].tabs.length]
-                  if tab.id is windows[i].tabs[j].id
-                    currentWindowId = i
-                    break
-              if newwin = windows[++currentWindowId]
-                newWindowId = newwin.id
-              else
-                newWindowId = windows[0].id
-              chrome.tabs.move tab.id, windowId: newWindowId, index: 1000, ->
-                chrome.tabs.update tab.id, active: true, -> dfd.resolve()
+            chrome.windows.getAll { windowTypes: ["normal"], populate: true }, pipe(
+              F.filter (win) -> not win.incognito
+              (normalWins) ->
+                currentWinIndex = normalWins.findIndex (win) -> win.tabs.some (wintab) -> wintab.id is tab.id
+                normalWins[currentWinIndex + 1] ||  normalWins[0]
+              (nextWindow) ->
+                chrome.tabs.move tab.id, windowId: nextWindow.id, index: 1000, ->
+                  chrome.tabs.update tab.id, active: true, ->
+                    chrome.windows.update nextWindow.id, focused: true, -> dfd.resolve()
+            )
         when "duplicateTab"
           getActiveTab().done (tab, windowId) ->
             chrome.tabs.duplicate tab.id, -> dfd.resolve()
         when "duplicateTabWin"
           getActiveTab().done (tab, windowId) ->
             chrome.tabs.duplicate tab.id, (tab) ->
-              chrome.windows.create {tabId: tab.id, focused: true, type: "normal"}, -> dfd.resolve()
+              chrome.windows.create { tabId: tab.id, focused: true, type: "normal" }, -> dfd.resolve()
         when "pinTab"
           getActiveTab().done (tab, windowId) ->
             chrome.tabs.update tab.id, pinned: !tab.pinned, -> dfd.resolve()
@@ -705,22 +652,14 @@ execCommand = (keyEvent) ->
               chrome.tabs.setZoom tab.id, newZoomFactor, -> dfd.resolve()
         when "switchNextWin"
           chrome.windows.getAll null, (windows) ->
-            for i in [0...windows.length]
-              if windows[i].focused
-                if i is windows.length - 1
-                  chrome.windows.update windows[0].id, {focused: true}, -> dfd.resolve()
-                else
-                  chrome.windows.update windows[i + 1].id, {focused: true}, -> dfd.resolve()
-                break
+            currentWindowId = windows.findIndex (win) -> win.focused
+            nextWindow = windows[currentWindowId + 1] ||  windows[0]
+            chrome.windows.update nextWindow.id, focused: true, -> dfd.resolve()
         when "switchPrevWin"
           chrome.windows.getAll null, (windows) ->
-            for i in [0...windows.length]
-              if windows[i].focused
-                if i is 0
-                  chrome.windows.update windows[windows.length - 1].id, {focused: true}, -> dfd.resolve()
-                else
-                  chrome.windows.update windows[i - 1].id, {focused: true}, -> dfd.resolve()
-                break
+            currentWindowId = windows.findIndex (win) -> win.focused
+            nextWindow = windows[currentWindowId - 1] ||  windows[windows.length - 1]
+            chrome.windows.update nextWindow.id, focused: true, -> dfd.resolve()
         when "closeOtherWins"
           chrome.windows.getAll null, (windows) ->
             closeWindow dfd, windows, 0
@@ -737,7 +676,7 @@ execCommand = (keyEvent) ->
               else
                 chrome.tabs.executeScript tab.id,
                   file: "kbdagent.js"
-                  allFrames: true
+                  allFrames: false
                   runAt: "document_end"
                   (resp) -> setClipboardWithHistory dfd, tab.id
         when "showHistory"
@@ -748,7 +687,7 @@ execCommand = (keyEvent) ->
               else
                 chrome.tabs.executeScript tab.id,
                   file: "kbdagent.js"
-                  allFrames: true
+                  allFrames: false
                   runAt: "document_end"
                   (resp) -> showCopyHistory dfd, tab.id
         when "insertCSS"
@@ -771,7 +710,7 @@ execCommand = (keyEvent) ->
                   execJS dfd, tab.id, code, item.command.allFrames
                 else
                   chrome.tabs.executeScript tab.id,
-                    file: "lib/jquery.cli.min.js"
+                    file: "lib/jquery.min.js"
                     allFrames: item.command.allFrames
                     (resp) ->
                       execJS dfd, tab.id, code, item.command.allFrames
@@ -786,13 +725,11 @@ execCommand = (keyEvent) ->
             startTime: 0
             maxResults: 10000
             (histories) ->
-              deleteUrls = []
-              for i in [0...histories.length]
-                history = histories[i]
-                unless (history.title + history.url).indexOf(findStr) is -1
-                  deleteUrls.push history.url
+              deleteUrls = histories
+                .filter (history) -> (history.title + history.url).indexOf(findStr) isnt -1
+                .map (history) -> history.url
               if deleteUrls.length > 0
-                deleteHistory dfd, deleteUrls, 0
+                deleteHistory dfd, deleteUrls, 0              
         when "clearCookiesAll"
           chrome.browsingData.removeCookies {}, -> dfd.resolve()
         when "clearCookies"
@@ -804,7 +741,7 @@ execCommand = (keyEvent) ->
                 unless ("." + domain).indexOf(cookie.domain) is -1
                   secure = if cookie.secure then "s" else ""
                   url = "http#{secure}://" + cookie.domain + cookie.path
-                  removeSpecs.push {"url": url, "name": cookie.name}
+                  removeSpecs.push { "url": url, "name": cookie.name }
               removeCookie dfd, removeSpecs, 0
         when "clearCache"
           chrome.browsingData.removeCache {}, -> dfd.resolve()
@@ -825,12 +762,12 @@ execCommand = (keyEvent) ->
 setConfigPlugin = (keyConfigSet, wheelSwitches) ->
   sendData = []
   if keyConfigSet
-    kbdtype = andy.local.config.kbdtype
-    keys = andy.getKeyCodes()[kbdtype].keys
+    { kbdtype } = andy.local.config
+    { keys } = andy.getKeyCodes()[kbdtype]
     keyConfigSet.forEach (item) ->
       scanCode = ~~item.new.substring(2)
       if /^00|^04/.test(item.new) && !/^F\d|^Application/.test(keys[scanCode]) && !/^045\d\d/.test(item.new)
-        if item.new is "00768"
+        if item.new is "00768" and item.title
           chrome.browserAction.setTitle title: item.title
       else if item.batch && item.new && item.mode isnt "through"
         sendData.push [item.new, item.origin, "batch"].join(";")
@@ -883,9 +820,9 @@ window.andy =
         ]
         lang = chrome.i18n.getUILanguage()
         if /^ja/.test lang
-          @local.config = {kbdtype: "JP", lang: "ja"}
+          @local.config = { kbdtype: "JP", lang: "ja" }
         else
-          @local.config = {kbdtype: "US", lang: "en"}
+          @local.config = { kbdtype: "US", lang: "en" }
         @local.config.defaultSleep = defaultSleep
         dfd.resolve()
     dfd.promise()
@@ -895,7 +832,7 @@ window.andy =
     dfd = $.Deferred()
     chrome.storage.local.clear =>
       @local = {}
-      @local.config = {kbdtype: "JP", lang: "ja"}
+      @local.config = { kbdtype: "JP", lang: "ja" }
       $.Deferred().resolve()
     dfd.promise()
   setLocal0: ->
@@ -903,7 +840,7 @@ window.andy =
     setTimeout((=>
       items = {}
       unless items.config
-        items.config = {kbdtype: "JP"}
+        items.config = { kbdtype: "JP" }
       unless items.ctxMenuFolderSet
         items.ctxMenuFolderSet = []
       @local = items
@@ -966,50 +903,9 @@ window.andy =
       success: false, err: e.message, errLine: e.location.first_line + 1
   helpFileName: "help/help.md"
 
-scHelp = {}
-scHelpSect = {}
-scHelpPageUrl = "https://support.google.com/chrome/answer/157179?hl="
-
-scrapeHelp = (lang, sectInit, elTab) ->
-  targets = $(elTab).find("tr:has(td:first-child:has(strong))")
-  $.each targets, (i, elem) ->
-    content = elem.cells[1].textContent.replace /^\s+|\s$/g, ""
-    Array.prototype.forEach.call elem.childNodes[1].getElementsByTagName("strong"), (strong) ->
-      scKey = strong.textContent.toUpperCase().replace /\s/g, ""
-      scKey = scKey.replace("PGUP", "PAGEUP").replace("PGDOWN", "PAGEDOWN").replace(/DEL$/, "DELETE").replace(/INS$/, "INSERT").replace("ホーム", "HOME").replace("キー", "").replace("BAR", "")
-      unless scHelp[scKey]?[lang]
-        unless scHelp[scKey]
-          scHelp[scKey] = {}
-        scHelp[scKey][lang] = []
-      scHelp[scKey][lang].push sectInit + "^" + content
-
-analyzeScHelpPage = (resp, lang) ->
-  doc = $(resp)
-  mainSection = doc.find("div.cc")
-  sectOS = null
-  Array.prototype.forEach.call mainSection[0].children, (el) ->
-    sectInit = null
-    if el.tagName is "H3"
-      sectOS = el.textContent
-    if /^Windows.+Linux$/.test(sectOS) and el.className is "zippy"
-      switch el.textContent
-        when "Tab and window shortcuts", "タブとウィンドウのショートカット"
-          sectInit = "T"
-        when "Google Chrome feature shortcuts", "Google Chrome 機能のショートカット"
-          sectInit = "C"
-        when "Address bar shortcuts", "アドレスバーのショートカット"
-          sectInit = "A"
-        when "Webpage shortcuts", "ウェブページのショートカット"
-          sectInit = "W"
-        when "Text shortcuts", "テキストのショートカット"
-          sectInit = "Tx"
-      if sectInit
-        scHelpSect[sectInit] = el.textContent
-        scrapeHelp lang, sectInit, content = $(el).next().find(".nice-table")
-
 registerCtxMenu = (dfd, ctxMenus, index) ->
   if ctxMenu = ctxMenus[index]
-    {id, type, caption, contexts, parentId} = ctxMenus[index]
+    { id, type, caption, contexts, parentId } = ctxMenus[index]
     if /pause/.test type
       ctxData = type: "normal", enabled: false
     else
@@ -1065,15 +961,12 @@ createCtxMenus = () ->
           if ctxMenu.contexts is "all"
             contextAll++
         else
-          existsFolder = false
-          for i in [0...ctxMenus.length]
-            if ctxMenus[i].id is ctxMenu.parentId
-              existsFolder = true
-              break
+          existsFolder = ctxMenus.some (ctxMenu) -> ctxMenu.id is ctxMenu.parentId
           unless existsFolder
             for i in [0...ctxMenuFolderSet.length]
-              if ctxMenuFolderSet[i].id is ctxMenu.parentId
-                folder = ctxMenuFolderSet[i]
+              ctxMenuFolder = ctxMenuFolderSet[i]
+              if ctxMenuFolder.id is ctxMenu.parentId
+                folder = ctxMenuFolder
                 ctxMenus.push
                   id: folder.id
                   order: ctxMenu.order
@@ -1095,40 +988,76 @@ createCtxMenus = () ->
         for key of contexts
           if contexts[key] >= 2
             contexts[key] = getUuid("T")
-        rootTitles = []
-        for i in [0...ctxMenus.length]
-          if ctxMenus[i].parentId is "route" and /^T/.test rootId = contexts[ctxMenus[i].contexts]
-            ctxMenus[i].parentId = rootId
-            rootTitles.push
-              id: rootId
-              contexts: [ctxMenus[i].contexts]
-              title: rootTitle
+        rootTitles = ctxMenus
+          .filter (ctxMenu) -> 
+            ctxMenu.parentId is "route" and /^T/.test contexts[ctxMenu.contexts]
+          .map (ctxMenu) ->
+            ctxMenu.parentId = contexts[ctxMenu.contexts]
+            id: rootId
+            contexts: [ctxMenu.contexts]
+            title: rootTitle
+        # for i in [0...ctxMenus.length]
+        #   if ctxMenus[i].parentId is "route" and /^T/.test rootId = contexts[ctxMenus[i].contexts]
+        #     ctxMenus[i].parentId = rootId
+        #     rootTitles.push
+        #       id: rootId
+        #       contexts: [ctxMenus[i].contexts]
+        #       title: rootTitle
         makeRootTitle($.Deferred(), rootTitles, 0).done ->
           registerCtxMenu dfdMain, ctxMenus, 0
       else
         registerCtxMenu dfdMain, ctxMenus, 0
     dfdMain.promise()
 
-getHelp = (lang) ->
-  $.get(scHelpPageUrl + lang).done (responseText) ->
-    analyzeScHelpPage responseText, lang
-    dfd.resolve()
-  (dfd = $.Deferred()).promise()
+scHelp = {}
+scHelpSect = {}
 
-createFileHelpMd = (content) ->
-  window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem
-  window.requestFileSystem PERSISTENT, 1024*100, (fileSystem) ->
-    fileSystem.root.getFile "help.md", {create: true, exclusive: false},
-      (fileEntry) ->
-        fileEntry.createWriter (fileWriter) ->
-          blob = new Blob [content], {"type": "text/plain"}
-          fileWriter.write(blob)
-          fileWriter.onwriteend = (e) ->
-            andy.helpFileName = fileEntry.toURL()
-          fileWriter.onerror = (e) ->
-            console.log e
-      (error) ->
-        console.log "FileApi error": error
+scrapeHelp = (lang, sectInit, elTab) ->
+  targets = $(elTab).find "tr:has(td:first-child:not(:has(strong)))"
+  targets.each (i, elem) ->
+    content = elem.cells[0].textContent.replace /^\s+|\s$/g, ""
+    [elem.cells[1].getElementsByTagName("strong")...].forEach (strong) ->
+      scKey = strong.textContent.toUpperCase().replace /\s/g, ""
+      scKey = scKey.replace("PGUP", "PAGEUP").replace("PGDOWN", "PAGEDOWN").replace(/DEL$/, "DELETE").replace(/INS$/, "INSERT").replace("ホーム", "HOME").replace("キー", "").replace("BAR", "")
+      unless scHelp[scKey]?[lang]
+        unless scHelp[scKey]
+          scHelp[scKey] = {}
+        scHelp[scKey][lang] = []
+      scHelp[scKey][lang].push sectInit + "^" + content
+
+analyzeScHelpPage = (text, lang) ->
+  doc = $ text
+  mainSection = doc.find("div.cc")
+  sectOS = null
+  [mainSection[0].children...].forEach (el) ->
+    sectInit = null
+    if el.tagName is "H2"
+      sectOS = el.textContent
+    if /^Windows.+Linux$/.test(sectOS) and el.className is "zippy"
+      switch el.textContent
+        when "Tab and window shortcuts", "タブとウィンドウのショートカット"
+          sectInit = "T"
+        when "Google Chrome feature shortcuts", "Google Chrome 機能のショートカット"
+          sectInit = "C"
+        when "Address bar shortcuts", "アドレスバーのショートカット"
+          sectInit = "A"
+        when "Webpage shortcuts", "ウェブページのショートカット"
+          sectInit = "W"
+        when "Text shortcuts", "テキストのショートカット"
+          sectInit = "Tx"
+      if sectInit
+        scHelpSect[sectInit] = el.textContent
+        scrapeHelp lang, sectInit, content = $(el).next().find(".nice-table")
+
+getHelp = (lang) ->
+  dfd = $.Deferred()
+  url = chrome.runtime.getURL "help_#{lang}.html"
+  fetch(url)
+    .then (response) -> response.text()
+    .then (text) ->
+      analyzeScHelpPage text, lang
+      dfd.resolve()
+  dfd.promise()
 
 checkDllVer = ->
   chrome.runtime.sendNativeMessage nmhNameAndArch, "command": "GetVersion", (resp) ->
@@ -1140,9 +1069,6 @@ checkDllVer = ->
         resp = null
     if !resp
       chrome.tabs.create url: "installview.html"
-
-# chrome.runtime.onInstalled.addListener ->
-#   checkDllVer()
 
 chrome.runtime.getPlatformInfo (platformInfo) ->
   nmhNameAndArch = "com.scware.nmhost" + if platformInfo.arch is "x86-64" then "64" else ""
@@ -1180,7 +1106,3 @@ $ ->
       scHelp["CTRL+RIGHT"] =
         en: ["W^Moves your cursor to the next key term in the address bar."]
         ja: ["W^アドレスバー内の次の単語にカーソルを移動します。"]
-
-  #urlHelpMd = "https://dl.dropboxusercontent.com/u/41884666/help.md"
-  #$.get(urlHelpMd).done (respText) ->
-  #  createFileHelpMd respText

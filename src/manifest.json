@@ -20,7 +20,7 @@
     },
     "default_title": "Shortcutware"
   },
-  "web_accessible_resources": ["kbdagent.js"],
+  "web_accessible_resources": ["kbdagent.js", "help_jp.html", "help_us.html"],
   "content_security_policy": "script-src 'unsafe-eval' 'self'; object-src 'self';",
   "permissions": [
     "*://*/*",

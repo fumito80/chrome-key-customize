@@ -9,19 +9,19 @@ del    = require 'del'
 # gulpif = require 'gulp-if'
 
 uglifyOrThru = ->
-  if process.argv.includes 'dev'
-    tap (file) -> console.log 'Skip uglify: ' + file.path
-  else
+  if process.argv.includes 'prd'
     uglify()
+  else
+    tap (file) -> console.log 'Skip uglify: ' + file.path
 
 zip = (done) ->
-  if process.argv.includes 'dev'
-    console.log 'Skip zipped'
-    done()
-  else
+  if process.argv.includes 'prd'
     manifest = JSON.parse require('fs').readFileSync('./dist/manifest.json')
     zipfld './dist', "./zipped/kbd.#{manifest.version}.zip", (err) ->
       done(err)
+  else
+    console.log 'Skip zipped'
+    done()
 
 cp = ->
   src 'src/**/*.*'
@@ -49,11 +49,18 @@ clean = (cb) -> del ['dist'], cb
 
 build = series(
   clean
-  compileBare
+  # compileBare
   compileMerged
   compileOther
   cp
   zip
 )
 
-exports.default = exports.dev = build
+exports.src = cp
+
+exports.coffee = series(
+  compileMerged
+  compileOther
+)
+
+exports.default = exports.prd = build

@@ -1,4 +1,4 @@
-var keys = new Array(1000);
+var keys = new Array(800);
 keys[0x00] = ["(error)"];
 keys[0x01] = ["Esc"];
 keys[0x02] = ["1", "!"];

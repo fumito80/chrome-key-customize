@@ -71,6 +71,8 @@ class ExplorerBaseView extends PopupBaseView
     PopupBaseView.prototype.events
   constructor: (options) ->
     super(options)
+    unless options.skipNiceScroll
+      @setNiceScroll()
     # ctx = document.getCSSCanvasContext("2d", "triangle", 10, 6);
     # ctx.translate(.5, .5)
     # ctx.fillStyle = "#000000"
@@ -83,6 +85,7 @@ class ExplorerBaseView extends PopupBaseView
     # ctx.closePath()
     # ctx.fill()
     # ctx.stroke()
+  setNiceScroll: ->
     @$(".result_outer").niceScroll
       cursorwidth: 12
       cursorborderradius: 6
@@ -379,6 +382,7 @@ class CommandOptionsView extends ExplorerBaseView
     "click .tabs a"              : "onClickSwitchCoffee"
     PopupBaseView.prototype.events
   constructor: (options) ->
+    options.skipNiceScroll = true
     super(options)
     @editer = CodeMirror.fromTextArea $(".content")[0],
       mode: "text/javascript"
@@ -397,6 +401,7 @@ class CommandOptionsView extends ExplorerBaseView
       @onStopDrag()
     @editer.lineAtHeight 18
     # super(options)
+    @setNiceScroll()
     @$(".content_outer").resizable
       minWidth: 650
       minHeight: 100

@@ -10,14 +10,10 @@
   <link href='http://fonts.googleapis.com/css?family=Noto+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Michroma' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
-  <!--
-  <link rel="stylesheet" href="lib/codemirror/theme/elegant.css">
-  <link rel="stylesheet" href="lib/codemirror/theme/base16-light.css">
-  -->
   <title>Shortcutware</title>
 </head>
 <body>
-  <div class="header">
+  <header>
     <span class="h1">
       <span class="title1">Shortcut</span><span class="title2">ware</span>
     </span>
@@ -26,13 +22,14 @@
     <a href="helpview.html" target="_blank" class="helpview">ヘルプ</a>
     <button class="ctxmgr" title="Context menu manager"><i class="icon-reorder"></i> Ctx menu mgr</button>
     <button class="addKeyConfig"><i class="icon-plus-sign"></i> Add new</button>
-  </div>
-  <div class="fixed-table-container">
+  </header>
+  <main class="fixed-table-container">
     <div class="header-background"></div>
     <div class="fixed-table-container-inner">
       <table class="keyConfigSetView"></table>
     </div>
-  </div>
+  </main>
+  <footer></footer>
   <div id="sortarea"></div>
   <div id="tiptip_holder" style="display: none; margin: 709px 0px 0px 107px;" class="tip_right">
     <div id="tiptip_arrow" style="margin-left: -12px; margin-top: 5px;">
@@ -40,7 +37,6 @@
     </div>
     <div id="tiptip_content"></div>
   </div>
-  <div class="footer"></div>
   <div class="popup settingsView">
     <i class="icon-remove" title="Cancel"></i>
     <form>
@@ -89,7 +85,6 @@
         <button class="paste small"><i class="icon-paste"></i> Paste</button>
         <button class="impRestore small disabled" disabled="disabled"><i class="icon-undo"></i> Load prev settings</button>
         <button class="impReplace small orange"><i class="icon-download-alt"></i> Import</button>
-        <!--<button class="impMerge small"><i class="icon-plus"></i> Merge</button>-->
       </div>
     </div>
   </div>
@@ -258,7 +253,6 @@
   <script src="lib/jquery-ui-1.10.3.custom.min.js"></script>
   <script src="lib/jquery.nicescroll.min.js"></script>
   <script src="lib/jquery.tipTip.js"></script>
-  <script src="keyidentifiers.js"></script>
   <script src="lib/codemirror/lib/codemirror.js"></script>
   <script src="lib/codemirror/mode/css/css.js"></script>
   <script src="lib/codemirror/mode/javascript/javascript.js"></script>

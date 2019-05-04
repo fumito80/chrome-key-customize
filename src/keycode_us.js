@@ -1,6 +1,6 @@
 var keys = new Array(800);
 keys[0x00] = ["(error)"];
-keys[0x01] = ["Esc"];
+keys[0x01] = ["Escape"];
 keys[0x02] = ["1", "!"];
 keys[0x03] = ["2", "@"];
 keys[0x04] = ["3", "#"];

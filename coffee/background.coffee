@@ -126,7 +126,7 @@ chrome.contextMenus.onClicked.addListener (info, tab) ->
 getScanCode = (keyName) ->
   kbdtype = andy.local.config.kbdtype
   { keys } = andy.getKeyCodes()[kbdtype]
-  keys.findIndex ([unshift, shift]) -> keyName is unshift || keyName is shift
+  keys.findIndex (key) -> keyName is key?[0] || keyName is key?[1]
 
 execShortcut = (dfd, cbDone, transCode, scCode, sleepMSec, execMode, batchIndex) ->
   if transCode
@@ -253,7 +253,7 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
             cbDone dfd, 0
           ), 0)
         when "clientOnKeyDown"
-          console.log request.value1
+          # console.log request.value1
           setTimeout((->
             keyname = request.value1
             scCode = if request.value2 then "04" else "00"
@@ -398,7 +398,7 @@ execBatchMode = (scCode) ->
             execShortcut dfd, cbDone, null, keyConfig.origin, defaultSleep, "keydown", batchIndex
           when "command"
             execCommand(keyConfig.new).done (results) ->
-              if results.length > 0
+              if results?.length > 0
                 { cid, cancel } = results.find((result) -> result?.cid || result?.cancel) || { cid: null, cancel: null }
                 if cancel
                   #throw new Error "Command canceled"

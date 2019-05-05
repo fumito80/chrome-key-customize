@@ -1,12 +1,10 @@
 { src, dest, series } = require 'gulp'
 coffee = require 'gulp-coffee'
-babel  = require 'gulp-babel'
 uglify = require('gulp-uglify-es').default
 concat = require 'gulp-concat'
 tap    = require 'gulp-tap'
 zipfld = require 'zip-folder'
 del    = require 'del'
-# gulpif = require 'gulp-if'
 
 uglifyOrThru = ->
   if process.argv.includes 'prd'
@@ -30,7 +28,6 @@ cp = ->
 compile = (source, coffeeOp = {}) ->
   source
     .pipe coffee coffeeOp
-    # .pipe babel()
     .pipe uglifyOrThru()
     .pipe dest 'dist'
 

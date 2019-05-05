@@ -5,34 +5,19 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "gulp": "gulp",
-    "makeHelpJson": "coffee ./makeHelpJson.coffee"
+    "gulp": "gulp"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "babel": {
-    "presets": [
-      "@babel/preset-env"
-    ],
-    "only": [
-      "**/script.js"
-    ]
-  },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
     "coffeescript": "^2.3.2",
     "del": "^4.1.0",
     "gulp": "^4.0.0",
-    "gulp-babel": "^8.0.0",
     "gulp-coffee": "^3.0.3",
     "gulp-concat": "^2.6.1",
-    "gulp-if": "^2.0.2",
     "gulp-tap": "^1.0.1",
     "gulp-uglify-es": "^1.0.4",
-    "jsdom": "^15.0.0",
-    "puppeteer": "^1.15.0",
     "uglify-es": "^3.3.9",
     "zip-folder": "^1.0.0"
   },

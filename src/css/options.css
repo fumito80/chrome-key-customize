@@ -18,9 +18,17 @@ body {
   overflow: hidden;
   background-color: #F6F6F6;
 }
-body input[type="text"], body input[type="number"] {
+input[type="text"], input[type="number"], select, textarea {
+  outline: 0;
   border-radius: 1px;
   box-shadow: none;
+}
+select:focus, input[type="number"]:focus, textarea:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+label {
+  margin-bottom: 0;
 }
 header {
   position: fixed;
@@ -32,7 +40,7 @@ header {
   /* background: -webkit-gradient(linear, center bottom, center top, from(#000), to(#444)); */
   background: -webkit-gradient(linear, center bottom, center top, from(#F6F6F6), to(#BDCFD2));
   /* box-shadow: 0 0 7px #666; */
-  z-index: 1;
+  z-index: 3;
 }
 header .h1 {
   font: 22px 'Subway Black', Arial;
@@ -67,6 +75,27 @@ footer {
 footer.scrolling {
   box-shadow: 0 -7px 4px -4px #666 inset;
 }
+.main-menu {
+  display: none;
+  position: absolute;
+  z-index: 4;
+  top: 100%;
+  left: auto;
+  right: 40px;
+  padding: .5rem 0;
+  margin: .125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: .25rem;
+}
+.main-menu.selecting {
+  display: inline-block;
+}
+.main-menu > a {
+  cursor: default;
+}
 .scrollEnd {
   position: absolute;
   top: 8px;
@@ -99,15 +128,9 @@ footer.scrolling {
   border: 7px solid rgb(122, 122, 160);
   border-radius: 5px;
 }
-.addKeyConfig, .ctxmgr, button.settings {
+.menu-settings, .addKeyConfig {
   margin: 5px;
   margin-right: 10px;
-  padding: 7px 10px;
-  float: right;
-  display: none;
-}
-.scHelp, .helpview {
-  margin: 8px;
   float: right;
   display: none;
 }
@@ -141,11 +164,18 @@ footer.scrolling {
 .keyConfigSetView thead th {
   border: 0;
   font-weight: normal;
+  padding-left: 10px;
 }
 tbody .data:hover {
   background: lavender;
 }
-th.remap_arrow {
+th, td {
+  font-size: 0.9em;
+}
+.keyConfigSetView thead th.remap_arrow {
+  padding-left: 1px;
+}
+.keyConfigSetView tbody th.remap_arrow {
   padding: 3px 5px;
 }
 .th_inner {
@@ -166,12 +196,13 @@ th.remap_arrow {
   white-space: nowrap;
   font: 1.2em 'Arial';
   outline: 0;
-  padding: 3px 4px;
+  padding: 0 4px;
   display: inline-block;
   border-radius: 3px;
   box-shadow: none;
   border: 1px solid rgba(0,0,0,0);
   cursor: pointer;
+  margin-right: 10px;
 }
 .new.disabled span {
   color: #CC0000;
@@ -184,16 +215,16 @@ th.remap_arrow {
 .origin.disabled, .icon-arrow-right.disabled {
   display: none;
 }
-.origin.bookmark, .icon-arrow-right.bookmark {
+.origin.bookmark, .icon-arrow-right.bookmark,  .icon-arrow-right.comment {
   display: none;
 }
 .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
-  box-shadow: 0 0 4px #6DB9FF;
-  border: 1px solid #50B1FE;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 .new:focus span, .origin.remap:focus span, .origin.keydown:focus span {
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
   background: #FFFFFF;
 }
 .new span, .origin span {
@@ -213,19 +244,22 @@ th.remap_arrow {
 .origin span {
   color: #000000;
 }
-.keyConfigSetView .addnew th, .keyConfigSetView .addnew td {
-  border-bottom: 1px dotted #ddd;
+.keyConfigSetView .addnew th {
+  padding: 0 7px 5px 7px;
+}
+.keyConfigSetView .addnew th div.addnew {
+  padding: 2px 4px;
 }
 div.addnew:focus {
   margin-top: 5px;
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
   background: #FFFFFF;
   font-weight: normal;
   color: #999999;
 }
 .keyConfigSetView td.options {
-  padding-left: 11px;
+  padding-left: 10px;
   white-space: nowrap;
   position: relative;
 }
@@ -233,13 +267,20 @@ div.addnew:focus {
   position: absolute;
   z-index: 2;
   display: none;
-  padding: 1px;
-  border: 1px solid #999999;
+  padding: 2px 1px;
   background: #FFFFFF;
-  outline: none;
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
   border-radius: 3px;
+}
+.selectMode.selecting {
+  display: block;
+}
+.data:hover .selectCog.selecting {
+  display: block;
+}
+.selectMode i, .selectCog i {
+  width: 15px;
+  display: inline-block;
+  text-align: center;
 }
 .selectMode div, .selectCog div {
   padding: 3px 5px;
@@ -294,19 +335,12 @@ i.icon-arrow-right {
   color: #518BAB;
 }
 .keyConfigSetView thead tr {
-  border: hidden;
+  border: none;
 }
 .keyConfigSetView tbody td, .keyConfigSetView tbody th {
   border: 0;
-  padding: 4px 5px;
 }
-.keyConfigSetView th.ctxmenu, .keyConfigSetView td.ctxmenu {
-  padding: 3px 0 4px 0;
-}
-.keyConfigSetView .border td {
-  padding: 0;
-}
-.keyConfigSetView div.border {
+.keyConfigSetView div.borderRow {
   border-top: 1px dotted #999999;
   padding: 0;
 }
@@ -325,27 +359,24 @@ i.icon-arrow-right {
 .keyConfigSetView tbody .desc {
   position: relative;
   width: 80%;
-  padding-left: 10px;
+  padding: 0 10px;
   cursor: default;
 }
+.keyConfigSetView tbody .desc > * {
+  float: left;
+}
 .sectInit, .ctgIcon {
+  min-width: 18px;
   border-radius: 3px;
   color: white;
   padding: 0 3px;
-  margin-top: 0px;
   margin-right: 3px;
-  font-size: 12px;
-  height: 17px;
   text-align: center;
   cursor: default;
-  float: left;
 }
 .sectInit {
   width: 17px;
   background: rgb(122, 122, 160);
-}
-.ctgIcon {
-  min-width: 17px;
 }
 .Tab {
   background: rgb(133, 203, 241); /* light blue */
@@ -369,27 +400,19 @@ i.icon-arrow-right {
 .Ext {
   background: #f66;
 }
-button.cog.small {
-  position: absolute;
-  top: 8px;
+.desc button.cog {
   right: 6px;
-  left: auto;
-  padding: 2px 5px;
+  padding: 0 6px;
   display: none;
-  border-radius: 1px;.sl
+  float: right;
+  height: 19px;
 }
 .data:hover button.cog {
   display: inline-block;
 }
-button.cog.selecting {
-  display: inline-block;
-}
 .selectCog {
-  position: absolute;
-  right: 6px;
-  top: 27px;
-  background: white;
-  padding: 2px 0;
+  right: 10px;
+  top: 26px;
 }
 .selectCog i {
   color: #666666;
@@ -443,6 +466,9 @@ button.cog.selecting {
 .keyConfigSetView .desc input.memo {
   font-family: 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
   width: 90%;
+  font-size: 1.0em;
+  padding: 3px;
+  height: 24px;
 }
 .keyConfigSetView .desc div.command {
   float: left;
@@ -520,6 +546,9 @@ button.cog.selecting {
   background: #FFFFFF;
   box-shadow: 0 0 20px black;
 }
+.popup .h7 {
+  font-weight: bold;
+}
 .popup input[type='text'], .popup textarea {
   font: 1.0em 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
 }
@@ -591,8 +620,8 @@ button.cog.selecting {
 }
 /* ScrollBaseView */
 .popup .expand-icon {
-  -webkit-transform: rotate(-90deg);
-  -webkit-transition: all 150ms;
+  transform: rotate(-90deg);
+  transition: all 150ms;
   background-image: url(img/triangle.png);
   background-position: 50% 50%;
   background-repeat: no-repeat;
@@ -663,6 +692,8 @@ button.cog.selecting {
   cursor: pointer;
 }
 .bookmarks .query {
+  display: inline-block;
+  width: auto;
   padding-right: 23px;
   margin-left: 15px;
 }
@@ -777,10 +808,6 @@ button.cog.selecting {
 }
 .commandOptions .cm-s-default.CodeMirror-focused {
   box-shadow: 0 0 5px #CCC;
-  /*
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
-  */
 }
 .commandOptions .CodeMirror.cm-s-default pre {
   box-shadow: none;
@@ -805,15 +832,11 @@ button.cog.selecting {
 }
 .ctxmenu-icon {
   width: 18px;
-  height: 17px;
   color: #FFF;
   background: #1E90FF; /*#158D8D*/
   border-radius: 3px;
-  margin-top: 0px;
   text-align: center;
-  /*padding-top: 2px;*/
-  font-size: 0.9em;
-  display: inline-block;
+  margin-left: 5px;
 }
 .ctxMenuOptions .chkShowManager {
   margin-top: 8px;
@@ -828,15 +851,17 @@ button.cog.selecting {
 .ctxMenuOptions .inputs input.parentName {
   position: absolute;
   z-index: 2;
-  left: 2px;
-  top: 1px;
+  left: 6px;
+  top: 6px;
   width: 370px;
   border: none;
   box-shadow: none;
+  outline: none;
 }
 .ctxMenuOptions .selectParent.focus {
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
+  outline: 0;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 /*** Context Menu Manger ***/
 .ctxMenuManager .panel1 {
@@ -848,7 +873,7 @@ button.cog.selecting {
 .ctxMenuManager .contextIcon {
   display: inline-block;
   width: 18px;
-  height: 17px;
+  height: 18px;
   padding-top: 2px;
   margin-right: 2px;
   text-align: center;
@@ -890,7 +915,6 @@ button.cog.selecting {
   text-align: left;
   margin-top: 8px;
   width: 105px;
-  border-radius: 0;
   font-size: 0.9em;
 }
 .ctxMenuManager .delete {
@@ -900,8 +924,9 @@ button.cog.selecting {
   margin-top: 10px;
 }
 .ctxMenuManager span.contexts {
-  cursor: default;
   font-weight: bold;
+  padding: 1px 2px !important;
+  cursor: pointer;
 }
 .ctxMenuManager .menuCaption {
   cursor: pointer;
@@ -948,7 +973,7 @@ button.cog.selecting {
 .ctxMenuManager span[tabIndex='0'] {
   border: 1px solid rgba(0,0,0,0);
   padding: 0 2px;
-  margin: 0 -2x;
+  margin: 0 -2px;
 }
 .ctxMenuManager span[tabIndex='0']:hover {
   background-color: rgba(204, 204, 255, 0.3);
@@ -1039,6 +1064,7 @@ button.cog.selecting {
 .parent th:first-child {
   position: relative;
   vertical-align: top;
+  padding-top: 4px;
 }
 .grpbartop, .grpbarbtm {
   position: absolute;
@@ -1064,40 +1090,29 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
   padding-top: 0;
   padding-bottom: 0;
 }
-.keyConfigSetView tbody .child.last th, .keyConfigSetView tbody .child.last td{
-  padding-top: 0;
-}
 .hover th:first-child {
   background-color: lavender;
 }
-.desc .updown {
+.data .desc .updown {
   display: none;
-  position: absolute;
-  right: 32px;
-  left: auto;
-  top: 8px;
+  float: right;
+  margin-right: 6px;
 }
-.desc .updown a {
-  padding: 3px 2px;
-}
-.desc .updown i {
+.data .desc .updown i {
   font-size: 0.8em;
 }
-.data:hover .desc .updown {
-  display: inline-block;
+.data .desc .updown button {
+  display: flex;
+  padding: 3px 5px;
 }
-.floatL {
-  float: left;
+.data:hover .desc .updown {
+  display: flex;
 }
 .inputSleep {
   display: none;
-  float: left;
-  outline: 0;
-  box-shadow: 0 0 7px #6DB9FF;
-  border: 1px solid #50B1FE;
-  padding: 1px;
-  border-radius: 0px;
+  border: 1px solid #ccc;
   width: 60px;
+  height: 20px;
 }
 .dispSleep {
   background-color: #ff8;
@@ -1132,7 +1147,8 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
 }
 .settingsView div.tabImp, .settingsView div.tabExp {
   padding: 5px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #999;
+  border-top: none;
   background: white;
 }
 .tabImp button, .tabExp button {
@@ -1146,13 +1162,20 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
   border: 1px solid #ccc;
   box-shadow: inset 0px 1px 6px #ccc;
 }
-.settingsView .tabs {
+.settingsView .nav-tabs {
   margin-top: 15px;
   line-height: 1.0em;
   float: none;
+  border-bottom-color: #999;
 }
-.settingsView .tabs a {
+.settingsView .nav-tabs a.active {
+  cursor: default;
+  border-color: #999 #999 #fff;
+}
+.settingsView .nav-tabs a:not(.active) {
   cursor: pointer;
+  background: #eee;
+  border-bottom-color: #999;
 }
 .settingsView .impReplace {
   margin-left: 15px;
@@ -1163,14 +1186,10 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
   margin-top: -3px;
 }
 .sleepMSec {
-  outline: none;
   border: 1px solid #ccc;
   box-shadow: inset 0px 1px 6px #ccc;
   transition: box-shadow 0.0s, border 0.5s, background 0.5s;
-}
-.sleepMSec:focus {
-  box-shadow: 0 0 5px #6DB9FF;
-  border: 1px solid #50B1FE;
+  text-indent: 3px;
 }
 .settingsView a.nmh {
   margin-left: 30px;

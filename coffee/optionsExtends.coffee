@@ -55,8 +55,8 @@ PopupBaseView = Backbone.View.extend
       $(".backscreen").hide()
       @$el.hide()
       @model?.trigger "setSelected", false
+      @$(".help").remove()
   hidePopup: ->
-    #router.showRootPage()
     @trigger "hidePopup"
   tmplHelp: _.template """
     <a href="helpview.html#<%=name%>" target="_blank" class="help" title="help">
@@ -73,18 +73,6 @@ class ExplorerBaseView extends PopupBaseView
     super(options)
     unless options.skipNiceScroll
       @setNiceScroll()
-    # ctx = document.getCSSCanvasContext("2d", "triangle", 10, 6);
-    # ctx.translate(.5, .5)
-    # ctx.fillStyle = "#000000"
-    # ctx.beginPath()
-    # ctx.moveTo(8, 0)
-    # ctx.lineTo(8, .5)
-    # ctx.lineTo(8/2-.5, 8/2+.5)
-    # ctx.lineTo(0, .5)
-    # ctx.lineTo(0, 0)
-    # ctx.closePath()
-    # ctx.fill()
-    # ctx.stroke()
   setNiceScroll: ->
     @$(".result_outer").niceScroll
       cursorwidth: 12
@@ -122,17 +110,17 @@ class SettingsView extends PopupBaseView
   el: ".settingsView"
   defaultIcon: "images/default.png"
   events: _.extend
-    "click .copyExp"   : "onClickCopy"
-    "click .saveSync"  : "onClickSaveSync"
-    "click .loadSync"  : "onClickLoadSync"
-    "click .paste"     : "onClickPaste"
-    "click .impReplace": "onClickReplace"
-    "click .impMerge"  : "onClickMerge"
-    "click .impRestore": "onClickRestore"
-    "click .tabs a"    : "onClickTab"
-    "click .clear"     : "onClickClear"
+    "click .copyExp"     : "onClickCopy"
+    "click .saveSync"    : "onClickSaveSync"
+    "click .loadSync"    : "onClickLoadSync"
+    "click .paste"       : "onClickPaste"
+    "click .impReplace"  : "onClickReplace"
+    "click .impMerge"    : "onClickMerge"
+    "click .impRestore"  : "onClickRestore"
+    "click .nav-tabs a"  : "onClickTab"
+    "click .clear"       : "onClickClear"
     "click .btnLoadIcon" : "onClickLoadIcon"
-    "change .loadIcon" : "onChangeIcon"
+    "change .loadIcon"   : "onChangeIcon"
     PopupBaseView.prototype.events
   constructor: (options) ->
     super(options)
@@ -172,7 +160,7 @@ class SettingsView extends PopupBaseView
       return
     @$(".loadIcon").replaceWith "<input type=\"file\" class=\"loadIcon\" accept=\"image/x-png\" />"
     @customIcon = null
-    @$el.append @tmplHelp @
+    # @$el.append @tmplHelp @
   onSubmitForm: ->
     defaultSleep = ~~@$(".sleepMSec").val()
     if !defaultSleep?
@@ -192,12 +180,10 @@ class SettingsView extends PopupBaseView
     location.reload()
     false
   onClickTab: (event) ->
-    newTab = event.currentTarget.className
-    unless (currentTab$ = @$("div." + newTab)).is(":visible")
-      @$("div.tabExp,div.tabImp").hide()
-      currentTab$.show()
-      @$(".tabs li").removeClass "current"
-      @$(".tabs li:has(a.#{newTab})").addClass "current"
+    [, which, active] = /(tabImp|tabExp).*(active)/.exec(event.currentTarget.className) || [, '', '']
+    unless active is "active"
+      @$("div.tabExp, div.tabImp").toggle()
+      @$(".nav-tabs a").toggleClass "active"
   onClickCopy: ->
     chrome.runtime.sendMessage
       action: "setClipboard"
@@ -317,8 +303,8 @@ commandsDisp =
   #copyText:       ["clip", "Copy text with history", "Clip"]
   #showHistory:    ["clip", "Show copy history"     , "Clip"]
   openExtProg:    ["custom", "Open URL from external program", [], "Ext"]
-  insertCSS:      ["custom", "Inject CSS", [{value:"allFrames", caption:"All frames"}], "CSS", ""]
-  execJS:         ["custom", "Inject JavaScript", [
+  insertCSS:      ["custom", "Insert CSS", [{value:"allFrames", caption:"All frames"}], "CSS", ""]
+  execJS:         ["custom", "Execute Script", [
     {value:"allFrames" ,  caption:"All frames"}
     {value:"coffee"    ,  caption:"CoffeeScript"}
     {value:"jquery"    ,  caption:"jQuery"}
@@ -359,8 +345,6 @@ class OptionExtProgView extends PopupBaseView
     else
       caption = $.trim @$("input[name='program']:checked").parent().text()
     unless content is ""
-      #unless caption = @$(".caption").val()
-      #  caption = content.split("\n")[0]
       @model
         .set
           "command":
@@ -400,7 +384,6 @@ class CommandOptionsView extends ExplorerBaseView
     @editer.on "change", =>
       @onStopDrag()
     @editer.lineAtHeight 18
-    # super(options)
     @setNiceScroll()
     @$(".content_outer").resizable
       minWidth: 650
@@ -422,7 +405,7 @@ class CommandOptionsView extends ExplorerBaseView
       if @options[option.value]
         option.checked = "checked"
       commandOption.append @tmplOptions option
-    @$el.append @tmplHelp @
+    # @$el.append @tmplHelp @
     @editer.setOption "readOnly", false
     @onClickChkCoffee currentTarget: @$("input[value='coffee']")
   showPopup2: ->
@@ -546,7 +529,7 @@ class CommandsView extends PopupBaseView
     unless super(name, model)
       return
     @$(".radioCommand").val [@options.name] if @options
-    @$el.append @tmplHelp @
+    # @$el.append @tmplHelp @
   onSubmitForm: ->
     if command = @$(".radioCommand:checked").val()
       if command is "openExtProg"
@@ -601,7 +584,7 @@ class BookmarkOptionsView extends PopupBaseView
     (elFindtab = @$("input[value='findtab']")[0]).checked = if (findtab = @options.findtab) is undefined then true else findtab
     @onClickFindTab currentTarget: elFindtab
     @$("input[value='noActivate']")[0].checked = @options.noActivate
-    @$el.append @tmplHelp @
+    # @$el.append @tmplHelp @
   onShowPopup: (name, model, bmId) ->
     if @name is name
       @newSite = null
@@ -759,7 +742,7 @@ class CtxMenuOptionsView extends PopupBaseView
       @model.trigger "getDescription", container = {}
       desc = container.desc
     @$(".caption").val desc
-    @$el.append @tmplHelp @
+    # @$el.append @tmplHelp @
     @$("input[value='#{((contexts = @ctxMenu?.contexts) || 'page')}']")[0].checked = true
     if @ctxMenu
       @$(".delete").addClass("orange").removeClass("disabled").removeAttr("disabled")
@@ -859,7 +842,7 @@ class CtxMenuGetterView extends PopupBaseView
     @$el.hide(200)
     @trigger "addCtxMenus", true
   tmplMessage: _.template """
-    Add entries to context menu for <span class="ctxmenu-icon"><i class="<%=icon%>"></i></span><strong><%=contextName%></strong><%=folder%><br>from the shortcuts that you selected.
+    Add entries to context menu for <strong><%=contextName%></strong><%=folder%><br>from the shortcuts that you selected.
     """
 
 class CtxMenuManagerView extends ExplorerBaseView
@@ -884,32 +867,6 @@ class CtxMenuManagerView extends ExplorerBaseView
     @ctxMenuGetterView = new CtxMenuGetterView {}
     @ctxMenuGetterView.on "addCtxMenus", @onAddCtxMenus, @
     keyConfigSetView.on "addCtxMenu", @onAddCtxMenu, @
-    # ctx = document.getCSSCanvasContext("2d", "empty", 18, 18);
-    # ctx.strokeStyle = "#CC0000"
-    # ctx.lineWidth = "2"
-    # ctx.lineCap = "round"
-    # ctx.beginPath()
-    # ctx.moveTo 1, 1
-    # ctx.lineTo 17, 17
-    # ctx.moveTo 1, 17
-    # ctx.lineTo 17, 1
-    # ctx.stroke()
-    # ctx = document.getCSSCanvasContext("2d", "updown", 26, 24);
-    # ctx.fillStyle = "rgb(122, 122, 160)"
-    # ctx.lineWidth = "2"
-    # ctx.lineCap = "round"
-    # ctx.lineJoin = "round"
-    # ctx.strokeStyle = "#333333"
-    # for i in [0..1]
-    #   ctx.beginPath()
-    #   ctx.moveTo 1, 5
-    #   ctx.lineTo 5, 1
-    #   ctx.lineTo 9, 5
-    #   ctx.moveTo 5, 1
-    #   ctx.lineTo 5, 9
-    #   ctx.stroke()
-    #   ctx.translate 18, 18
-    #   ctx.rotate(180 * Math.PI / 180);
     @collection.comparator = (model) -> model.get "order"
   render: ->
     height = window.innerHeight - 60 #height
@@ -919,9 +876,8 @@ class CtxMenuManagerView extends ExplorerBaseView
     @setContextMenu()
     @setSortable ".folders", ".title,.menuCaption", @onUpdateFolder
     @setSortable ".ctxMenus", ".menuCaption", @onUpdateMenu
-    $.each @$(".editButtons button"), (i, el) =>
-      @disableButton _.map(document.querySelectorAll(".editButtons button"), (el) -> el.className.match(/^(\w+)\s/)[1])
-    @$el.append @tmplHelp @
+    @disableButton XX(".editButtons button").map (el) -> el.className.replace(/\s+/g, '.')
+    # @$el.append @tmplHelp @
     @
   onSubmitForm: ->
     false
@@ -1103,10 +1059,10 @@ class CtxMenuManagerView extends ExplorerBaseView
     @onUpdateFolder null, null, @
   enableButton: (buttonClasses) ->
     buttonClasses.forEach (className) =>
-      @$("button." + className).removeClass("disabled").removeAttr("disabled")
+      @$("." + className).removeClass("disabled").removeAttr("disabled")
   disableButton: (buttonClasses) ->
     buttonClasses.forEach (className) =>
-      @$("button." + className).addClass("disabled").attr("disabled", "disabled")
+      @$("." + className).addClass("disabled").attr("disabled", "disabled")
   onClickItem: (event) ->
     switch event.currentTarget.className
       when "contexts"

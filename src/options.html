@@ -2,14 +2,15 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="css/options.css" type="text/css" media="all">
-  <link rel="stylesheet" href="css/kickstart.css" type="text/css" media="all">
+  <!-- <link rel="stylesheet" href="css/kickstart.css" type="text/css" media="all"> -->
+  <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/fonts/font-awesome/css/font-awesome.min.css" type="text/css" media="all">
   <link href='css/no-theme/jquery-ui-1.10.3.custom.min.css' rel='stylesheet' type='text/css'>
   <link href='css/tipTip.css' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Noto+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Michroma' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="css/options.css" type="text/css" media="all">
   <title>Shortcutware</title>
 </head>
 <body>
@@ -17,11 +18,18 @@
     <span class="h1">
       <span class="title1">Shortcut</span><span class="title2">ware</span>
     </span>
-    <button class="settings"><i class="icon-wrench"></i> Settings</button>
-    <a href="#" target="scHelp" class="scHelp"></a>
-    <a href="helpview.html" target="_blank" class="helpview">ヘルプ</a>
-    <button class="ctxmgr" title="Context menu manager"><i class="icon-reorder"></i> Ctx menu mgr</button>
-    <button class="addKeyConfig"><i class="icon-plus-sign"></i> Add new</button>
+    <div class="btn-group menu-settings">
+      <button class="btn btn-light settings"><i class="icon-cog"></i> Settings</button>
+      <button class="btn btn-light menu-main" title="Menu"><i class="icon-ellipsis-horizontal"></i></button>
+    </div>
+    <button class="btn btn-light addKeyConfig"><i class="icon-plus"></i> Prepend new mapped key</button>
+    <div class="main-menu" tabIndex="0">
+      <!-- <a class="dropdown-item addKeyConfig"><i class="icon-plus-sign"></i> Prepend new mapped key</a> -->
+      <a class="dropdown-item ctxmgr"><i class="icon-reorder"></i> Context menu manager</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item scHelp" href="#" target="scHelp" class="scHelp"></a>
+      <!-- <a class="dropdown-item" href="helpview.html" target="_blank" class="helpview">ヘルプ(Japanese only)</a> -->
+    </div>
   </header>
   <main class="fixed-table-container">
     <div class="header-background"></div>
@@ -40,8 +48,8 @@
   <div class="popup settingsView">
     <i class="icon-remove" title="Cancel"></i>
     <form>
-      <div class="panel1">Settings</span>
-        <button class="done blue"><i class="icon-ok"></i> Done</button>
+      <div class="panel1"><span class="h7">Settings</span>
+        <button class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button>
         <a href="installview.html" target="_blank" class="nmh">Shortcutware installation</a>
       </div>
       <div class="inputs" style="padding-bottom: 0">
@@ -62,29 +70,29 @@
         </label><br>
         <div class="loadIcon2">
           <input type="file" class="loadIcon" accept="image/x-png">
-          <button class="btnLoadIcon small"><i class="fa fa-refresh"></i> Change app icon(.png)...</button>
+          <button class="btn btn-light btn-sm btnLoadIcon"><i class="fa fa-refresh"></i> Change app icon(.png)...</button>
           <img class="customIcon" src="images/default.png">
         </div>
       </div>
     </form>
     <div class="inputs" style="padding-top: 0">
-      <ul class="tabs">
-        <li class="current"><a class="tabExp">Export</a></li>
-        <li><a class="tabImp">Import</a></li>
+      <ul class="nav nav-tabs">
+        <li class="nav-item"><a class="tabExp nav-link active">Export</a></li>
+        <li class="nav-item"><a class="tabImp nav-link">Import</a></li>
       </ul>
       <div class="tabExp"> Settings data(JSON)<br>
         <textarea class="export" readonly="readonly"></textarea>
         <br>
-        <button class="saveSync small"><i class="icon-cloud-upload"></i> Save Chrome sync</button>
-        <button class="copyExp small"><i class="icon-copy"></i> Copy clipboard</button>
+        <button class="btn btn-light btn-sm saveSync"><i class="icon-cloud-upload"></i> Save Chrome sync</button>
+        <button class="btn btn-light btn-sm copyExp"><i class="icon-copy"></i> Copy clipboard</button>
       </div>
       <div class="tabImp" style="display:none"> Settings data(JSON) <!--<button class="clear small">Clear</button>--><br>
         <textarea class="import"></textarea>
         <br>
-        <button class="loadSync small"><i class="icon-cloud-download"></i> Load Chrome sync</button>
-        <button class="paste small"><i class="icon-paste"></i> Paste</button>
-        <button class="impRestore small disabled" disabled="disabled"><i class="icon-undo"></i> Load prev settings</button>
-        <button class="impReplace small orange"><i class="icon-download-alt"></i> Import</button>
+        <button class="btn btn-light btn-sm loadSync"><i class="icon-cloud-download"></i> Load Chrome sync</button>
+        <button class="btn btn-light btn-sm paste"><i class="icon-paste"></i> Paste</button>
+        <button class="btn btn-light btn-sm impRestore disabled" disabled="disabled"><i class="icon-undo"></i> Load prev settings</button>
+        <button class="btn btn-warning btn-sm impReplace"><i class="icon-download-alt"></i> Import</button>
       </div>
     </div>
   </div>
@@ -92,7 +100,7 @@
     <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">Bookmark for <span class="shortcut"></span>
-        <input type="text" class="query" size="16" placeholder="Get all"><button type="submit"><i class="icon-search"></i></button>
+        <input type="text" class="form-control query" size="16" placeholder="Get all"><button type="submit"><i class="icon-search"></i></button>
         <label><input type="checkbox" class="expandAll"> Expand all</label>
       </div>
     </form>
@@ -103,7 +111,7 @@
   <div class="popup commands">
     <i class="icon-remove" title="Cancel"></i>
     <form>
-      <div>Command for <span class="shortcut"></span><button type="submit" class="done blue"><i class="icon-ok"></i> Done</button></div>
+      <div>Command for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button></div>
       <div class="commandRadios"></div>
     </form>
   </div>
@@ -111,8 +119,8 @@
     <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
-        <span class="command"></span> for <span class="shortcut"></span><button type="submit" class="done blue"><i class="icon-ok"></i> Done</button><br>
-        <input type="text" class="caption" placeholder="Title">
+        <span class="command"></span> for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
+        <input type="text" class="form-control caption" placeholder="Title">
       </div>
       <div class="inputs"></div>
       <!-- Tabs Right -->
@@ -130,15 +138,15 @@
     <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
-        <span class="command">Open URL from external program</span> for <span class="shortcut"></span><button type="submit" class="done blue"><i class="icon-ok"></i> Done</button><br>
-        <!--<input type="text" class="caption" placeholder="Title(Optional)">-->
+        <span class="command">Open URL from external program</span> for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
+        <!--<input type="text" class="form-control caption" placeholder="Title(Optional)">-->
       </div>
       <div class="inputs">
         <label><input type="radio" name="program" value="iexplore" checked="checked"> Internet Explorer</label><br>
         <label><input type="radio" name="program" value="firefox"> Firefox</label><br>
         <label>
           <input type="radio" name="program" value="other"> Specified program<br>
-          <input type="text" class="progPath" placeholder="Enter the full path or relative path to the PATH env variable">
+          <input type="text" class="form-control progPath" placeholder="Enter the full path or relative path to the PATH env variable">
         </label>
       </div>
     </form>
@@ -147,7 +155,7 @@
     <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
-        Bookmark for <span class="shortcut"></span><button type="submit" class="done blue"><i class="icon-ok"></i> Done</button><br>
+        Bookmark for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
       </div>
       <div class="inputs">
         <div class="bookmarkPanel">
@@ -179,7 +187,7 @@
         </label><br>
         <label class="labelFindStr">
           <div> - The title or URL to find (Partial match)</div>
-          <input type="text" class="findStr" placeholder="Use bookmark URL">
+          <input type="text" class="form-control findStr" placeholder="Use bookmark URL">
         </label>
       </div>
     </form>
@@ -189,12 +197,12 @@
     <form>
       <div class="panel1">
         Context Menu for <span class="shortcut"></span>
-        <button type="submit" class="done blue"><i class="icon-ok"></i> Done</button>
-        <button class="delete"><i class="icon-trash"></i> Delete</button>
+        <button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button>
+        <button class="btn btn-light btn-sm delete"><i class="icon-trash"></i> Delete</button>
       </div>
       <div class="inputs">
         <label>&nbsp;Menu Title:<br>
-          <input type="text" class="caption">
+          <input type="text" class="form-control caption">
         </label>
         <fieldset>
           <legend>Context type</legend>
@@ -220,29 +228,29 @@
     <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">Context Menu Manager</span>
-        <button class="done blue"><i class="icon-ok"></i> Done</button>
+        <button class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button>
       </div>
     </form>
     <div class="result_outer">
       <!-- <label class="rootTitle">Root title:
-        <input type="text" class="rootTitle" placeholder="Chrome Shortcutware">
+        <input type="text" class="form-control rootTitle" placeholder="Chrome Shortcutware">
       </label> -->
       <div class="result"></div>
     </div>
-    <div class="editButtons">
-      <button class="newmenu small disabled" disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button><br>
-      <button class="newfolder small disabled" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button><br>
-      <button class="rename small disabled" disabled="disabled"><i class="icon-pencil"></i> Rename</a></button><br><br>
-      <button class="remove small disabled" disabled="disabled"><i class="icon-trash"></i> Remove</a></button><br>
-      <!-- <button class="trash small disabled" disabled="disabled"><i class="icon-refresh"></i> Trash bin</a></button> -->
+    <div class="editButtons"> 
+      <button class="btn btn-light btn-sm newmenu disabled" disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button><br>
+      <button class="btn btn-light btn-sm newfolder disabled" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button><br>
+      <button class="btn btn-light btn-sm rename disabled" disabled="disabled"><i class="icon-pencil"></i> Rename</a></button><br><br>
+      <button class="btn btn-light btn-sm remove disabled" disabled="disabled"><i class="icon-trash"></i> Remove</a></button><br>
+      <!-- <button class="btn btn-light btn-sm trash disabled" disabled="disabled"><i class="icon-refresh"></i> Trash bin</a></button> -->
     </div>
   </div>
   <div class="popup ctxMenusGetter">
     <div class="panel1">
       <span class="message"></span><br>
       <div class="buttons">
-        <button class="add blue"><i class="icon-plus-sign"></i> Add</button>
-        <button class="cancel"><i class="icon-ban-circle"></i> Cancel</button><br>
+        <button class="btn btn-primary btn-sm add"><i class="icon-plus-sign"></i> Add</button>
+        <button class="btn btn-light btn-sm cancel"><i class="icon-ban-circle"></i> Cancel</button><br>
       </div>
     </div>
   </div>

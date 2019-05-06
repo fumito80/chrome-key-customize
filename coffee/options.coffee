@@ -8,7 +8,7 @@ WebFontConfig =
 
 modeDisp =
   remap:    ["Remap"      , "icon-random"]
-  command:  ["Command..." , "icon-cog"]
+  command:  ["Command..." , "icon-asterisk"]
   bookmark: ["Bookmark...", "icon-bookmark-empty"]
   #keydown:  ["KeyDown"    , "icon-font"]
   disabled: ["Disabled"   , "icon-ban-circle"]
@@ -37,6 +37,8 @@ escape = (html) ->
 
 modifierKeys  = ["Ctrl", "Alt", "Shift", "Win", "MouseL", "MouseR", "MouseM"]
 modifierInits = ["c"   , "a"  , "s"    , "w"]
+
+XX = (selector, parent = document) -> [parent.querySelectorAll(selector)...]
 
 decodeKbdEvent = (kbdCode) ->
   unless kbdCode
@@ -76,17 +78,31 @@ HeaderView = Backbone.View.extend
   # Backbone Buitin Events
   el: "header"
   events:
-    "click .addKeyConfig": "onClickAddKeyConfig"
-    "click .ctxmgr"      : "onClickCtxmgr"
-    "click .settings"    : "onClickSettings"
+    "click .menu-main"    : "onClickMenu"
+    "click .addKeyConfig" : "onClickAddKeyConfig"
+    "click .ctxmgr"       : "onClickCtxmgr"
+    "click .settings"     : "onClickSettings"
+    "blur  .main-menu"    : "onBlurMenu"
   initialize: (options) ->
-    @$(".addKeyConfig,.ctxmgr,.scHelp,.helpview,.settings").show()
+    @$(".menu-settings, .addKeyConfig").show()
     @model.on "change:lang", @onChangeLang, @
   # DOM Events
+  onClickMenu: (event) ->
+    if (mainMenu = @$(".main-menu")).hasClass("blurNow")
+      mainMenu.removeClass "blurNow"
+      return
+    mainMenu.toggleClass("selecting").focus()
+  onBlurMenu: (event) ->
+    if (relatedTarget = $(event.relatedTarget)).hasClass("scHelp")
+      return
+    (mainMenu = @$(".main-menu").removeClass("selecting"))
+    if relatedTarget.hasClass("menu-main")
+      mainMenu.addClass("blurNow")
   onClickAddKeyConfig: (event) ->
     @trigger "clickAddKeyConfig", (event)
   onClickCtxmgr: ->
     @trigger "showPopup", "ctxMenuManager"
+    @$el.find(".main-menu").blur()
   onClickSettings: ->
     @trigger "showPopup", "settings"
   onEnterCtxMenuSelMode: ->
@@ -95,7 +111,7 @@ HeaderView = Backbone.View.extend
     @$("button").removeAttr("disabled").removeClass("disabled")
   onChangeLang: ->
     @$(".scHelp")
-      .text("Keyboard shortcuts")
+      .text("Google Keyboard Shortcuts Help")
       .attr "href", @scHelpUrl + @model.get("lang")
 
 Config = Backbone.Model.extend {}
@@ -115,7 +131,7 @@ KeyConfigView = Backbone.View.extend
   # Backbone Buitin Events
   events:
     "click .origin,.new"   : "onClickInput"
-    "click div.mode"       : "onClickMode"
+    "click .mode"          : "onClickMode"
     "click .selectMode div": "onChangeMode"
     "click .edit"          : "onClickEdit"
     "click .addCommand"    : "onClickAddCommand"
@@ -127,7 +143,7 @@ KeyConfigView = Backbone.View.extend
     "click .editSleep"     : "onClickEditSleep"
     "click input.memo,.inputSleep": "onClickInputMemo"
     "click button.cog"     : "onClickCog"
-    "click .updown a"      : "onClickUpDownChild"
+    "click .updown > .btn" : "onClickUpDownChild"
     "focus .new,.origin"   : "onFocusKeyInput"
     "focus .inputSleep"    : "onClickInputMemo"
     "keydown"              : "onKeydown"
@@ -365,12 +381,16 @@ KeyConfigView = Backbone.View.extend
   onClickMode: (event) ->
     if event.currentTarget.getAttribute("title") is "Suspend"
       return
-    if @$(".selectMode").toggle().is(":visible")
-      @$(".selectMode").focus()
-      @$(".mode").addClass("selecting")
-    else
-      @$(".mode").removeClass("selecting")
+    if (selectMode = @$(".selectMode")).hasClass("blurNow")
+      selectMode.removeClass "blurNow"
+      return
+    selectMode.toggleClass("selecting").focus()
     event.stopPropagation()
+
+  onBlurSelectMode: (event) ->
+    (selectMode = @$(".selectMode").removeClass("selecting"))
+    if event.relatedTarget
+      selectMode.addClass("blurNow")
 
   onChangeMode: (event, mode) ->
     if event
@@ -384,10 +404,6 @@ KeyConfigView = Backbone.View.extend
     @setDispMode mode
     @setDesc()
     @trigger "resizeInput"
-
-  onBlurSelectMode: ->
-    @$(".selectMode").hide()
-    @$(".mode").removeClass("selecting")
 
   onFocusKeyInput: ->
     lastFocused = @el
@@ -405,22 +421,16 @@ KeyConfigView = Backbone.View.extend
     @onSubmitMemo()
 
   onClickCog: (event) ->
-    if @$(".selectCog").toggle().is(":visible")
-      @$(".selectCog").focus()
-      $(event.currentTarget).addClass("selecting")
-    else
-      $(event.currentTarget).removeClass("selecting")
+    if (selectCog = @$(".selectCog")).hasClass("blurNow")
+      selectCog.removeClass "blurNow"
+      return
+    selectCog.toggleClass("selecting").focus()
     event.stopPropagation()
 
-  onBlurSelectCog: ->
-    if @loadIconHovered
-      setTimeout((->
-        @$(".selectCog").hide()
-        @$("button.cog").removeClass("selecting")
-      ), 1000)
-    else
-      @$(".selectCog").hide()
-      @$("button.cog").removeClass("selecting")
+  onBlurSelectCog: (event) ->
+    (selectCog = @$(".selectCog").removeClass("selecting"))
+    if event.relatedTarget
+      selectCog.addClass("blurNow")
 
   onClickEdit: (event) ->
     if (mode = @model.get "mode") is "through"
@@ -730,38 +740,38 @@ KeyConfigView = Backbone.View.extend
     @onChangeCtxmenu()
 
   tmplDesc: _.template """
-    <button class="cog small" title="menu"><i class="icon-caret-down"></i></button>
+    <button class="btn btn-outline-secondary btn-sm cog" title="Sub Menu"><i class="icon-ellipsis-horizontal"></i></button>
     <div class="selectCog" tabIndex="0">
       <div class="edit"><i class="<%=iconName%>"></i> <%=command%></div>
       <div class="addCommand"><i class="icon-plus"></i> Add command</div>
       <div class="ctxmenu"><i class="icon-reorder"></i> Create context menu...</div>
       <!--<div class="copySC"><i class="icon-copy"></i> Copy script</div>-->
       <div class="menuChangeIcon"></div>
-      <span class="seprater 1st"><hr style="margin:3px 1px" noshade></span>
+      <span class="seprater 1st"><hr style="margin:3px 1px"></span>
       <div class="pause"><i class="icon-pause"></i> Suspend</div>
       <div class="resume"><i class="icon-play"></i> Resume</div>
-      <span class="seprater"><hr style="margin:3px 1px" noshade></span>
+      <span class="seprater"><hr style="margin:3px 1px"></span>
       <div class="delete"><i class="icon-trash"></i> Delete</div>
     </div>
     """
 
   tmplUpDown: """
-    <ul class="button-bar updown">
-      <li class="first"><a href="#" title="up"><i class="icon-chevron-up"></i></a></li>
-  	  <li class="last"><a href="#" title="down"><i class="icon-chevron-down"></i></a></li>
-  	</ul>
+    <div class="btn-group updown">
+      <button class="btn btn-outline-secondary btn-sm" title="up"><i class="icon-chevron-up"></i></button>
+  	  <button class="btn btn-outline-secondary btn-sm" title="down"><i class="icon-chevron-down"></i></button>
+  	</div>
     """
 
   tmplMemo: _.template """
     <form class="memo">
-      <input type="text" class="memo">
+      <input type="text" class="form-control memo">
     </form>
     <div class="memo"><%=memo%></div>
     """
 
   tmplSleep: _.template """
     <form class="formSleep">
-      <div class="floatL">Sleep&nbsp;</div>
+      <span>Sleep</span>
       <input type="number" class="inputSleep" min="0" max="60000" step="10" required>
       <span class="dispSleep" title="Sleep <%=sleep%> msec"><%=sleep%></span>&nbsp;msec
       <i class="icon-pencil editSleep" title="Edit sleep msec(0-60000)"></i>
@@ -771,7 +781,8 @@ KeyConfigView = Backbone.View.extend
   tmplZoomFixed: _.template """
     <div class="ctgIcon Tab">Tab</div><div class="command">
       <form class="formSleep">
-        <div class="floatL">Zoom page&nbsp;</div><input type="number" class="inputSleep" min="25" max="500" step="1" required>
+        <span>Zoom page</span>
+        <input type="number" class="inputSleep" min="25" max="500" step="1" required>
         <span class="dispSleep" title="Zoom page <%=zoom%> %"><%=zoom%></span>&nbsp;%
         <i class="icon-pencil editSleep" title="Edit zoom factor % between 25 and 500"></i>
       </form>
@@ -780,7 +791,8 @@ KeyConfigView = Backbone.View.extend
   tmplZoomInc: _.template """
     <div class="ctgIcon Tab">Tab</div><div class="command">
       <form class="formSleep">
-        <div class="floatL">Zoom page - increments&nbsp;</div><input type="number" class="inputSleep" min="-100" max="100" step="1" required>
+        <span>Zoom page - increments</span>
+        <input type="number" class="inputSleep" min="-100" max="100" step="1" required>
         <span class="dispSleep" title="Zoom page - increments <%=zoom%> %"><%=zoom%></span>&nbsp;%
         <i class="icon-pencil editSleep" title="Edit increments % between -100 and 100"></i>
       </form>
@@ -855,7 +867,7 @@ KeyConfigSetView = Backbone.View.extend
     @$("tbody").sortable
       delay: 300
       scroll: true
-      cancel: "tr.border,tr.child,input"
+      cancel: ".borderRow,.child,input"
       placeholder: "ui-placeholder"
       forceHelperSize: true
       forcePlaceholderSize: true
@@ -867,7 +879,6 @@ KeyConfigSetView = Backbone.View.extend
         ui.item.effect("highlight", 1500)[0].scrollIntoViewIfNeeded true
     $(".fixed-table-container-inner")
       .on "scroll", (event) ->
-        #console.log @scrollTop + ": " + (@scrollHeight - @offsetHeight)
         if @scrollTop < 10
           $(".header-background").removeClass("scrolling")
         else
@@ -1087,6 +1098,7 @@ KeyConfigSetView = Backbone.View.extend
     if /child/.test lastFocused?.className
       lastFocused = $(lastFocused).prevAll(".parent:first")[0]
     @$("tbody")[0].insertBefore newItem$[0], lastFocused
+    @$("tbody")[0].insertBefore newItem$[2], lastFocused
     newItem$.find(".addnew").focus()[0].scrollIntoViewIfNeeded()
     @$("tbody").sortable "disable"
     windowOnResize()
@@ -1099,7 +1111,7 @@ KeyConfigSetView = Backbone.View.extend
     event.stopPropagation()
 
   onBlurAddnew: ->
-    @$(".addnew").remove()
+    @$(".addnew, .addnewBorder").remove()
     @$("tbody").sortable "enable"
     windowOnResize()
 
@@ -1110,17 +1122,17 @@ KeyConfigSetView = Backbone.View.extend
     @collection.trigger "changeKbd", @model.get("kbdtype")
 
   onStartSort: ->
-    @$("tr.child").hide()
-    @$(".ui-placeholder").nextAll("tr.border:first,tr.border:last").remove()
+    @$(".child").hide()
+    @$(".ui-placeholder").nextAll(".borderRow:first,.borderRow:last").remove()
     @$(".parent th:first-child").removeAttr "rowspan"
 
   # Object Method
   redrawTable: ->
-    @$("tr.child").show()
-    @$("tr.border").remove()
+    @$(".child").show()
+    @$(".borderRow").remove()
     @collection.models.forEach (model) =>
       model.trigger "setRowspan"
-    $("#sortarea").append @$("tr.data")
+    $("#sortarea").append @$(".data")
     @collection.trigger "updateOrderByEl"
     @collection.sort()
     @collection.models.forEach (model) =>
@@ -1136,7 +1148,7 @@ KeyConfigSetView = Backbone.View.extend
       model.trigger "updatePosition"
     $.each $("#sortarea tr"), (i, tr) =>
       @$("tbody").append tr
-    @$("tr.last").removeClass "last"
+    @$(".last").removeClass "last"
     $.each @$("tbody > tr"), (i, tr) =>
       unless /child/.test tr.nextSibling?.className
         (tr$ = $(tr)).after @tmplBorder
@@ -1156,11 +1168,15 @@ KeyConfigSetView = Backbone.View.extend
       </th>
       <td></td><td></td><td></td><td class="blank"></td>
     </tr>
+    <tr class="borderRow addnewBorder">
+      <td colspan="6"><div class="borderRow"></div></td>
+      <td></td>
+    </tr>
     """
 
   tmplBorder: """
-    <tr class="border">
-      <td colspan="6"><div class="border"></div></td>
+    <tr class="borderRow">
+      <td colspan="6"><div class="borderRow"></div></td>
       <td></td>
     </tr>
     """
@@ -1183,8 +1199,10 @@ KeyConfigSetView = Backbone.View.extend
         <th class="ctxmenu"></th>
         <th>
           <div class="th_inner desc">Description</div>
+          <!--
           <div class="scrollEnd top"><i class="icon-double-angle-up" title="Scroll to Top"></i></div>
           <div class="scrollEnd bottom"><i class="icon-double-angle-down" title="Scroll to Bottom"></i></div>
+          -->
         </th>
       </tr>
     </thead>

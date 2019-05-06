@@ -96,6 +96,19 @@ footer.scrolling {
 .main-menu > a {
   cursor: default;
 }
+.popup .nav-tabs {
+  line-height: 1.0em;
+  border-bottom-color: #999;
+}
+.popup .nav-tabs a.active {
+  cursor: default;
+  border-color: #999 #999 #fff;
+}
+.popup .nav-tabs a:not(.active) {
+  cursor: pointer;
+  background: #eee;
+  border-bottom-color: #999;
+}
 .scrollEnd {
   position: absolute;
   top: 8px;
@@ -215,7 +228,10 @@ th, td {
 .origin.disabled, .icon-arrow-right.disabled {
   display: none;
 }
-.origin.bookmark, .icon-arrow-right.bookmark,  .icon-arrow-right.comment {
+.origin.bookmark,
+.icon-arrow-right.bookmark,
+.icon-arrow-right.sleep,
+.icon-arrow-right.comment {
   display: none;
 }
 .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
@@ -483,6 +499,10 @@ i.icon-arrow-right {
   background-size: 16px;
   background-position-y: 1px;
 }
+.bookmarkOptions .bookmark {
+  background-position: 4px 4px;
+  text-indent: 4px;
+}
 .keyConfigSetView .caption {
   color: #000000;
   font-weight: bold;
@@ -599,13 +619,13 @@ i.icon-arrow-right {
   margin: 5px 0;
 }
 .popup fieldset {
-  margin-top: 20px;
-  margin-bottom: 10px;
+  margin: 20px 0;
 }
 .popup legend {
-  padding: 0 10px;
+  font-size: 1.2em;
 }
-.popup .inputs label {
+.popup .inputs > label {
+  display: flow-root;
   padding-left: 2px;
 }
 .popup .inputs input[type='text'] {
@@ -714,10 +734,11 @@ i.icon-arrow-right {
   font-size: 1.0em;
 }
 .bookmarkOptions .url {
-  padding-left: 20px;
+  margin: 0 10px;
   color: #999999;
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 2.5em;
 }
 .findStr {
   width: 400px;
@@ -754,6 +775,9 @@ i.icon-arrow-right {
   width: 400px;
   margin-top: 15px;
 }
+.commandOptions.popup {
+  padding-bottom: 5px;
+}
 .commandOptions .inputs {
   padding: 0;
   line-height: 1.3em;
@@ -785,15 +809,48 @@ i.icon-arrow-right {
   right: -10px;
   bottom: -10px;
 }
-.commandOptions ul.tabs {
+.commandOptions .btn-group {
   position: absolute;
   right: 10px;
-  margin-top: -26px;
-  border-bottom: 0;
-  width: auto;
+  top: 60px;
 }
-.commandOptions .tabs a {
+.commandOptions .btn-group input[name="coffeePreview"] {
+  width: 0;
+}
+.commandOptions .btn-group .btn:first-of-type {
+  border-bottom-left-radius: .25rem;
+  border-top-left-radius: .25rem;
+  color: #212529;
+}
+.commandOptions .btn-group .btn {
   cursor: pointer;
+  stroke: #333;
+}
+#radioCoffee:checked + label {
+  color: #fff;
+  background-color: #31b0d5;
+  background-image: none;
+  border-color: #2aabd2;
+  cursor: default;
+}
+#radioCoffee:focus + label {
+  box-shadow: 0 0 0 2px rgba(91, 192, 222, 0.5);
+}
+.commandOptions .svg-coffee {
+  margin-top: -3px;
+  width: 16px;
+}
+#radioCoffee:checked + label .svg-coffee path {
+  fill: #fff;
+}
+#radioPreview:checked + label {
+  color: #fff;
+  background-color: #ec971f;
+  background-image: none;
+  border-color: #eb9316;
+}
+#radioPreview:focus + label {
+  box-shadow: 0 0 0 2px rgba(240, 173, 78, 0.5);
 }
 .commandOptions .CodeMirror {
   width: 100%;
@@ -1164,18 +1221,7 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
 }
 .settingsView .nav-tabs {
   margin-top: 15px;
-  line-height: 1.0em;
   float: none;
-  border-bottom-color: #999;
-}
-.settingsView .nav-tabs a.active {
-  cursor: default;
-  border-color: #999 #999 #fff;
-}
-.settingsView .nav-tabs a:not(.active) {
-  cursor: pointer;
-  background: #eee;
-  border-bottom-color: #999;
 }
 .settingsView .impReplace {
   margin-left: 15px;

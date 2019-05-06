@@ -1,0 +1,7 @@
+{
+	"name": "com.scware.nmhost64",
+	"description": "Shortcutware Native Messaging Host",
+	"path": "flexkbd64.exe",
+	"type": "stdio",
+	"allowed_origins": ["chrome-extension://jfppigbedaokgkihkgjjmmifhabgflif/", "chrome-extension://blngoaefdecilbngbjllinninnoempag/"]
+}

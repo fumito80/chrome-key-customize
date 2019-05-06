@@ -41,12 +41,14 @@ PopupBaseView = Backbone.View.extend
       cursor: "move"
       delay: 200
       cancel: "input,textarea,button,select,option,.bookmarkPanel,span.contexts,span.menuCaption,span.title,div.CodeMirror"
+      start: => @onStartDrag()
       stop: => @onStopDrag()
     @el.style.left = Math.round((window.innerWidth  - @el.offsetWidth)  / 2) + "px"
     @el.style.top = Math.max(0, Math.round((window.innerHeight - @el.offsetHeight) / 2)) + "px"
     @$(".caption").focus()
     $(".backscreen").show()
     true
+  onStartDrag: -> # Virtual
   onStopDrag: -> # Virtual
   onClickIconRemove: ->
     @hidePopup()
@@ -87,11 +89,13 @@ class ExplorerBaseView extends PopupBaseView
       return false
     @$(".result_outer").getNiceScroll().show()
     true
+  onStartDrag: ->
+    @$(".result_outer").getNiceScroll().hide()
   onStopDrag: ->
-    @$(".result_outer").getNiceScroll().resize()
+    @$(".result_outer").getNiceScroll().show().resize()
   onHidePopup: ->
     if @$el.is(":visible")
-      @$(".result_outer").getNiceScroll().hide()
+      @onStartDrag()
       super()
   onClickExpandAll: ->
     if @$(".expandAll").is(":checked")
@@ -303,12 +307,12 @@ commandsDisp =
   #copyText:       ["clip", "Copy text with history", "Clip"]
   #showHistory:    ["clip", "Show copy history"     , "Clip"]
   openExtProg:    ["custom", "Open URL from external program", [], "Ext"]
-  insertCSS:      ["custom", "Insert CSS", [{value:"allFrames", caption:"All frames"}], "CSS", ""]
+  insertCSS:      ["custom", "Insert CSS", [{ value:"allFrames", caption:"All frames" }], "CSS", ""]
   execJS:         ["custom", "Execute Script", [
-    {value:"allFrames" ,  caption:"All frames"}
-    {value:"coffee"    ,  caption:"CoffeeScript"}
-    {value:"jquery"    ,  caption:"jQuery"}
-    {value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>"""}
+    { value:"jquery"    , caption:"jQuery" }
+    { value:"coffee"    , caption:"CoffeeScript" }
+    { value:"allFrames" , caption:"All frames" }
+    { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
   ], "JS"]
 
 catnames =
@@ -362,8 +366,8 @@ class CommandOptionsView extends ExplorerBaseView
   el: ".commandOptions"
   optionsName: "command"
   events: _.extend
-    "click input[value='coffee']": "onClickChkCoffee"
-    "click .tabs a"              : "onClickSwitchCoffee"
+    "click input[value='coffee']"       : "onClickChkCoffee"
+    "change input[name='coffeePreview']": "onClickSwitchCoffee"
     PopupBaseView.prototype.events
   constructor: (options) ->
     options.skipNiceScroll = true
@@ -441,13 +445,14 @@ class CommandOptionsView extends ExplorerBaseView
         return
       unless caption = @$(".caption").val()
         caption = content.split("\n")[0]
+      cmMode = @$(".execJS input[name='coffeePreview']:checked").val()
       if @options.name is "execJS" && options.coffee
-        content = if @$(".tabs li:has(a.x-coffeescript)").hasClass("current") then content else @coffee
+        content = if cmMode is "x-coffeescript" then content else @coffee
         result = andy.coffee2JS @model.id, content
         unless result.success
           unless confirm "A compilation error has occurred, but do you continue?\n\n  Line: #{result.errLine}\n  Error: #{result.err}"
             return false
-      if @options.name isnt "execJS" || @$(".tabs li:has(a.x-coffeescript)").hasClass("current")
+      if @options.name isnt "execJS" || cmMode is "x-coffeescript"
         @undoData = @editer.getHistory()
       andy.setUndoData @model.id, @undoData
       @model
@@ -464,20 +469,19 @@ class CommandOptionsView extends ExplorerBaseView
     false
   onClickChkCoffee: (event) ->
     if $(event.currentTarget).is(":checked") && @options.name is "execJS"
-      @$(".tabs").css visibility: "inherit"
+      @$(".execJS").css visibility: "inherit"
       @cmMode = "x-coffeescript"
-      @$(".tabs li").removeClass "current"
-      @$(".tabs li:has(a[class='#{@cmMode}'])").addClass "current"
     else
-      @$(".tabs").css visibility: "hidden"
+      @$(".execJS").css visibility: "hidden"
       @cmMode = "javascript"
       @editer.setOption "readOnly", false
-      if @$(".tabs li:has(a.javascript)").hasClass("current")
+      if @$(".execJS input[name='coffeePreview']:checked").val() is "javascript"
         @editer.clearHistory()
+    @$(".execJS input[name='coffeePreview'][value='#{@cmMode}']").prop("checked", true)
     @editer.setOption "mode", "text/" + @cmMode
-  onClickSwitchCoffee: (event) ->
-    unless (className = event.currentTarget.className) is @cmMode
-      if readOnly = (className is "javascript")
+  onClickSwitchCoffee: ->
+    unless (cmMode = @$(".execJS input[name='coffeePreview']:checked").val()) is @cmMode
+      if readOnly = (cmMode is "javascript")
         try
           value = CoffeeScript.compile (@coffee = @editer.getValue()), bare: "on"
           @undoData = @editer.getHistory()
@@ -489,21 +493,20 @@ class CommandOptionsView extends ExplorerBaseView
         value = @coffee
         #@editer.setOption "theme", "default"
       @editer.setValue ""
-      @editer.setOption "mode", "text/" + (@cmMode = className)
+      @editer.setOption "mode", "text/" + (@cmMode = cmMode)
       @editer.setValue value
       @editer.setOption "readOnly", readOnly
       if @cmMode is "x-coffeescript"
         @editer.clearHistory()
         @editer.setHistory @undoData
-      @$(".tabs li").removeClass "current"
-      @$(".tabs li:has(a[class='#{@cmMode}'])").addClass "current"
+      @$(".execJS input[name='coffeePreview'][value='#{@cmMode}']").prop("checked", true)
   hidePopup: ->
     @trigger "setEditerSize", @$(".content_outer").width(), @$(".content_outer").height()
     super()
   tmplOptions: _.template """
     <label>
       <input type="checkbox" value="<%=value%>" <%=checked%>> <%=caption%>
-    </label><br>
+    </label>
     """
 
 class CommandsView extends PopupBaseView
@@ -574,7 +577,13 @@ class BookmarkOptionsView extends PopupBaseView
       $.each @$(".inputs").children(), (i, elem) ->
         $(elem).show()
       @$(".bookmark").css("background-image", "-webkit-image-set(url(chrome://favicon/size/16@1x/#{@options.url}) 1x)")
-    @$(".url").text url.substring(0, 1024) + if @options.url.length > 1024 then " ..."
+    @$(".url").text url #.substring(0, 1024) + if @options.url.length > 1024 then " ..."
+      .niceScroll
+        cursorwidth: 7
+        cursorborderradius: 3
+        cursoropacitymin: .3
+        cursoropacitymax: .7
+        zindex: 999998
     @$(".findStr").val @options.findStr || url
     @$("input[value='#{(@options?.openmode || 'newtab')}']").get(0)?.checked = true
     @$(".tabpos").val "last"
@@ -595,8 +604,16 @@ class BookmarkOptionsView extends PopupBaseView
             super(name, model)
       else
         super(name, model)
+      @$(".url").getNiceScroll().show()
     else
       @$el.hide()
+  onHidePopup: ->
+    @onStartDrag()
+    super()
+  onStartDrag: ->
+    @$(".url").getNiceScroll().hide()
+  onStopDrag: ->
+    @$(".url").getNiceScroll().show().resize()
   onSubmitForm: ->
     options =
       findtab:  @$("input[value='findtab']").is(":checked")

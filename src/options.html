@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <!-- <link rel="stylesheet" href="css/kickstart.css" type="text/css" media="all"> -->
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/fonts/font-awesome/css/font-awesome.min.css" type="text/css" media="all">
   <link href='css/no-theme/jquery-ui-1.10.3.custom.min.css' rel='stylesheet' type='text/css'>
@@ -28,6 +27,7 @@
       <a class="dropdown-item ctxmgr"><i class="icon-reorder"></i> Context menu manager</a>
       <div class="dropdown-divider"></div>
       <a class="dropdown-item scHelp" href="#" target="scHelp" class="scHelp"></a>
+      <a class="dropdown-item nmh" href="installview.html" target="_blank">Shortcutware Installation Help</a>
       <!-- <a class="dropdown-item" href="helpview.html" target="_blank" class="helpview">ヘルプ(Japanese only)</a> -->
     </div>
   </header>
@@ -46,32 +46,35 @@
     <div id="tiptip_content"></div>
   </div>
   <div class="popup settingsView">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
-      <div class="panel1"><span class="h7">Settings</span>
-        <button class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button>
-        <a href="installview.html" target="_blank" class="nmh">Shortcutware installation</a>
+      <div class="panel1">
+        <span class="h7">Settings</span>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs" style="padding-bottom: 0">
         <label>
           <input type="checkbox" class="singleKey"> Single key keyboard shortcuts
-        </label><br>
+        </label>
         <label>
           <input type="checkbox" class="wheelSwitches"> Switches tab with mouse wheel
-        </label><br>
-        <label>Time interval between keystrokes for keyboard macro:<br>
+        </label>
+        <label>
+          <div>Time interval between keystrokes for keyboard macro:</div>
           <input type="number" class="sleepMSec" min="0" max="1000" step="1" value="100" required> milliseconds
-        </label><br>
-        <label>Keyboard type:<br>
+        </label>
+        <label>
+          <div>Keyboard type:</div>
           <select class="kbdtype"></select>
-        </label><br>
-        <label>Language of keyboard shortcuts help:<br>
+        </label>
+        <label>
+          <div>Language of keyboard shortcuts help:</div>
           <select class="lang"></select>
-        </label><br>
+        </label>
         <div class="loadIcon2">
           <input type="file" class="loadIcon" accept="image/x-png">
-          <button class="btn btn-light btn-sm btnLoadIcon"><i class="fa fa-refresh"></i> Change app icon(.png)...</button>
           <img class="customIcon" src="images/default.png">
+          <button class="btn btn-light btn-sm btnLoadIcon"><i class="fa fa-refresh"></i> Change app icon...</button>
         </div>
       </div>
     </form>
@@ -80,15 +83,19 @@
         <li class="nav-item"><a class="tabExp nav-link active">Export</a></li>
         <li class="nav-item"><a class="tabImp nav-link">Import</a></li>
       </ul>
-      <div class="tabExp"> Settings data(JSON)<br>
-        <textarea class="export" readonly="readonly"></textarea>
-        <br>
+      <div class="tabExp">
+        <div>Settings data(JSON)</div>
+        <div>
+          <textarea class="export" readonly="readonly"></textarea>
+        </div>
         <button class="btn btn-light btn-sm saveSync"><i class="icon-cloud-upload"></i> Save Chrome sync</button>
         <button class="btn btn-light btn-sm copyExp"><i class="icon-copy"></i> Copy clipboard</button>
       </div>
-      <div class="tabImp" style="display:none"> Settings data(JSON) <!--<button class="clear small">Clear</button>--><br>
-        <textarea class="import"></textarea>
-        <br>
+      <div class="tabImp" style="display:none">
+        <div>Settings data(JSON) </div>
+        <div>
+          <textarea class="import"></textarea>
+        </div>
         <button class="btn btn-light btn-sm loadSync"><i class="icon-cloud-download"></i> Load Chrome sync</button>
         <button class="btn btn-light btn-sm paste"><i class="icon-paste"></i> Paste</button>
         <button class="btn btn-light btn-sm impRestore disabled" disabled="disabled"><i class="icon-undo"></i> Load prev settings</button>
@@ -97,11 +104,11 @@
     </div>
   </div>
   <div class="popup bookmarks">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">Bookmark for <span class="shortcut"></span>
         <input type="text" class="form-control query" size="16" placeholder="Get all"><button type="submit"><i class="icon-search"></i></button>
         <label><input type="checkbox" class="expandAll"> Expand all</label>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
       </div>
     </form>
     <div class="result_outer">
@@ -109,20 +116,28 @@
     </div>
   </div>
   <div class="popup commands">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
-      <div>Command for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button></div>
+      <div>Command for <span class="shortcut"></span>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
+      </div>
       <div class="commandRadios"></div>
     </form>
   </div>
   <div class="popup commandOptions">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
+      <button type="button" class="btn btn-light cancel">Cancel</button>
+      <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
+      <div class="inputs"></div>
       <div class="panel1">
-        <span class="command"></span> for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
+        <div>
+          <span class="command"></span> for <span class="shortcut"></span>
+        </div>
         <input type="text" class="form-control caption" placeholder="Title">
       </div>
-      <div class="inputs"></div>
+      <div class="content_outer">
+        <textarea class="content" placeholder="Content"></textarea>
+      </div>
       <div class="btn-group execJS" data-toggle="buttons">
         <input type="radio" name="coffeePreview" id="radioCoffee" value="x-coffeescript" autocomplete="off" checked>
         <label class="btn btn-info btn-sm" for="radioCoffee">
@@ -133,36 +148,35 @@
           <span>Coffee</span>
         </label>
         <input type="radio" name="coffeePreview" id="radioPreview" value="javascript" autocomplete="off">
-        <label class="btn btn-warning btn-sm" for="radioPreview">Transpile preview</label>
-      </div>
-      <div class="content_outer">
-        <textarea class="content" placeholder="Content"></textarea>
+        <label class="btn btn-dark btn-sm" for="radioPreview">Transpile preview</label>
       </div>
       <div class="otherinput"></div>
     </form>
   </div>
   <div class="popup optionExtProg">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
-        <span class="command">Open URL from external program</span> for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
-        <!--<input type="text" class="form-control caption" placeholder="Title(Optional)">-->
+        <span class="command">Open URL from external program</span> for <span class="shortcut"></span>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
-        <label><input type="radio" name="program" value="iexplore" checked="checked"> Internet Explorer</label>
-        <label><input type="radio" name="program" value="firefox"> Firefox</label>
+        <label><input type="radio" name="program" value="firefox">Firefox</label>
+        <label><input type="radio" name="program" value="edge">Edge</label>
+        <label><input type="radio" name="program" value="iexplore" checked="checked">Internet Explorer</label>
         <label>
-          <input type="radio" name="program" value="other"> Specified program<br>
+          <input type="radio" name="program" value="other">Specified program<br>
           <input type="text" class="form-control progPath" placeholder="Enter the full path or relative path to the PATH env variable">
         </label>
       </div>
     </form>
   </div>
   <div class="popup bookmarkOptions">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
-        Bookmark for <span class="shortcut"></span><button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button><br>
+        Bookmark for <span class="shortcut"></span>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
         <div class="bookmarkPanel">
@@ -171,27 +185,28 @@
         </div>
         <fieldset>
           <legend>Tab Open Mode</legend>
-          <label><input type="radio" name="openmode" value="newtab" checked="checked"> Open in new tab - Tab position:
-          <select class="tabpos">
-            <option value="last">Last</option>
-            <option value="right">Right of the current</option>
-            <option value="left">Left of the current</option>
-            <option value="first">First</option>
-          </select>
-          </label><br>
-          <label><input type="radio" name="openmode" value="current"> Open in current tab</label><br>
-          <label><input type="radio" name="openmode" value="newwin"> Open in new window</label><br>
-          <label><input type="radio" name="openmode" value="incognito"> Open in incognito window</label><br>
-          <label><input type="radio" name="openmode" value="panel"> Open as panel window</label><br>
-          <label><input type="radio" name="openmode" value="findonly"> Only to find the tab</label><br>
+          <label>
+            <input type="radio" name="openmode" value="newtab" checked="checked"> Open in new tab - Tab position:
+            <select class="tabpos">
+              <option value="last">Last</option>
+              <option value="right">Right of the current</option>
+              <option value="left">Left of the current</option>
+              <option value="first">First</option>
+            </select>
+          </label>
+          <label><input type="radio" name="openmode" value="current"> Open in current tab</label>
+          <label><input type="radio" name="openmode" value="newwin"> Open in new window</label>
+          <label><input type="radio" name="openmode" value="incognito"> Open in incognito window</label>
+          <label><input type="radio" name="openmode" value="panel"> Open as panel window</label>
+          <label><input type="radio" name="openmode" value="findonly"> Only to find the tab</label>
           <hr class="alt1">
           <label>
             <input type="checkbox" value="noActivate"> Open an inactive tab/window
           </label>
         </fieldset>
         <label>
-          <input type="checkbox" value="findtab" checked="checked"> Activate the tab if already open<br>
-        </label><br>
+          <input type="checkbox" value="findtab" checked="checked"> Activate the tab if already open
+        </label>
         <label class="labelFindStr">
           <div> - The title or URL to find (Partial match)</div>
           <input type="text" class="form-control findStr" placeholder="Use bookmark URL">
@@ -200,34 +215,38 @@
     </form>
   </div>
   <div class="popup ctxMenuOptions">
-    <i class="icon-remove" title="Cancel"></i>
     <form>
       <div class="panel1">
         Context Menu for <span class="shortcut"></span>
-        <button type="submit" class="btn btn-primary btn-sm done"><i class="icon-ok"></i> Done</button>
-        <button class="btn btn-light btn-sm delete"><i class="icon-trash"></i> Delete</button>
+        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button class="btn btn-warning delete"><i class="icon-trash"></i> Delete</button>
+        <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
-        <label>&nbsp;Menu Title:<br>
+        <label>
+          <div>Menu Title:</div>
           <input type="text" class="form-control caption">
         </label>
         <fieldset>
           <legend>Context type</legend>
-          <label><input type="radio" name="ctxType" value="page" checked="checked"> <strong>Page</strong> - Return the page URL</label><br>
-          <label><input type="radio" name="ctxType" value="selection"> <strong>Selection　text</strong> - Return the selection text</label><br>
-          <label><input type="radio" name="ctxType" value="editable"> <strong>Editable element</strong> - Return the page URL or selection text</label><br>
-          <label><input type="radio" name="ctxType" value="link"> <strong>Link</strong> - Return the link URL</label><br>
-          <label><input type="radio" name="ctxType" value="image"> <strong>Image</strong> - Return the image URL</label><br>
-          <label><input type="radio" name="ctxType" value="all"> <strong>All</strong> - Return any of the above</label><br>
-          <label><input type="radio" name="ctxType" value="browser_action"> <strong>Toolbar Icon</strong></label><br>
-          <div class="note">Note:<br>&nbsp;&nbsp;The return value is assigned to the utility object's property <em>ctxData</em>.</div>
+          <label><input type="radio" name="ctxType" value="page" checked="checked"> <strong>Page</strong> - Return the page URL</label>
+          <label><input type="radio" name="ctxType" value="selection"> <strong>Selection　text</strong> - Return the selection text</label>
+          <label><input type="radio" name="ctxType" value="editable"> <strong>Editable element</strong> - Return the page URL or selection text</label>
+          <label><input type="radio" name="ctxType" value="link"> <strong>Link</strong> - Return the link URL</label>
+          <label><input type="radio" name="ctxType" value="image"> <strong>Image</strong> - Return the image URL</label>
+          <label><input type="radio" name="ctxType" value="all"> <strong>All</strong> - Return any of the above</label>
+          <label><input type="radio" name="ctxType" value="browser_action"> <strong>Toolbar Icon</strong></label>
+          <div class="note">Note:
+            <div>The return value is assigned to the utility object's property <em>ctxData</em>.</div>
+          </div>
         </fieldset>
-        <label>Parent folder:<br>
+        <label>
+          <div>Parent folder:</div>
           <div class="editableCombo">
             <input type="text" class="parentName" placeholder="Title of the new folder">
             <select class="selectParent"></select>
           </div>
-        </label><br>
+        </label>
       </div>
     </form>
   </div>
@@ -245,19 +264,18 @@
       <div class="result"></div>
     </div>
     <div class="editButtons"> 
-      <button class="btn btn-light btn-sm newmenu disabled" disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button><br>
-      <button class="btn btn-light btn-sm newfolder disabled" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button><br>
-      <button class="btn btn-light btn-sm rename disabled" disabled="disabled"><i class="icon-pencil"></i> Rename</a></button><br><br>
-      <button class="btn btn-light btn-sm remove disabled" disabled="disabled"><i class="icon-trash"></i> Remove</a></button><br>
-      <!-- <button class="btn btn-light btn-sm trash disabled" disabled="disabled"><i class="icon-refresh"></i> Trash bin</a></button> -->
+      <button class="btn btn-light btn-sm newmenu disabled" disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button>
+      <button class="btn btn-light btn-sm newfolder disabled" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button>
+      <button class="btn btn-light btn-sm rename disabled" disabled="disabled"><i class="icon-pencil"></i> Rename</a></button>
+      <button class="btn btn-light btn-sm remove disabled" disabled="disabled"><i class="icon-trash"></i> Remove</a></button>
     </div>
   </div>
   <div class="popup ctxMenusGetter">
     <div class="panel1">
-      <span class="message"></span><br>
+      <div class="message"></div>
       <div class="buttons">
         <button class="btn btn-primary btn-sm add"><i class="icon-plus-sign"></i> Add</button>
-        <button class="btn btn-light btn-sm cancel"><i class="icon-ban-circle"></i> Cancel</button><br>
+        <button class="btn btn-light btn-sm cancel"><i class="icon-ban-circle"></i> Cancel</button>
       </div>
     </div>
   </div>

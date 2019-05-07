@@ -93,10 +93,12 @@ HeaderView = Backbone.View.extend
       return
     mainMenu.toggleClass("selecting").focus()
   onBlurMenu: (event) ->
-    if (relatedTarget = $(event.relatedTarget)).hasClass("scHelp")
+    target = event.relatedTarget || event.target
+    if target.localName is "a"
+      @$(".main-menu").focus()
       return
     (mainMenu = @$(".main-menu").removeClass("selecting"))
-    if relatedTarget.hasClass("menu-main")
+    if $(target).hasClass("menu-main")
       mainMenu.addClass("blurNow")
   onClickAddKeyConfig: (event) ->
     @trigger "clickAddKeyConfig", (event)

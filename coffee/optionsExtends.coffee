@@ -13,8 +13,8 @@ PopupBaseView = Backbone.View.extend
     router.listenTo @, "showPopup", router.onNavigatePopup
     router.listenTo @, "hidePopup", router.onNavigateRootPage
   events:
-    "submit form"        : "onSubmitForm"
-    "click  .icon-remove": "onClickIconRemove"
+    "submit form"  : "onSubmitForm"
+    "click .cancel": "onClickCancel"
   render: -> # Virtual
   onSubmitForm: -> # Virtual
   onShowPopup: (name, model) ->
@@ -50,7 +50,7 @@ PopupBaseView = Backbone.View.extend
     true
   onStartDrag: -> # Virtual
   onStopDrag: -> # Virtual
-  onClickIconRemove: ->
+  onClickCancel: ->
     @hidePopup()
   onHidePopup: ->
     if @$el.is(":visible")
@@ -663,7 +663,7 @@ class BookmarksView extends ExplorerBaseView
       return
     if (target = @$("input.query")).val()
       target.focus()
-  onSubmitForm: ->
+  onSubmitForm: (event) ->
     @$(".result").empty()
     query = @$("input.query").focus().val()
     if query

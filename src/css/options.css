@@ -81,7 +81,7 @@ footer.scrolling {
   z-index: 4;
   top: 100%;
   left: auto;
-  right: 40px;
+  right: 30px;
   padding: .5rem 0;
   margin: .125rem 0 0;
   font-size: 1rem;
@@ -562,7 +562,7 @@ i.icon-arrow-right {
   display: none;
   position: fixed;
   z-index: 7;
-  padding: 10px;
+  padding: 15px;
   background: #FFFFFF;
   box-shadow: 0 0 20px black;
 }
@@ -604,9 +604,9 @@ i.icon-arrow-right {
   top: 7px;
   font-size: 20px;
 }
-.popup .done, .popup .delete {
-  margin-left: 15px;
-  padding: 7px 10px;
+.popup .done, .popup .cancel, .popup .delete {
+  float: right;
+  margin-left: 5px;
 }
 .popup .delete {
   margin-right: 60px;
@@ -625,7 +625,7 @@ i.icon-arrow-right {
   font-size: 1.2em;
 }
 .popup .inputs > label {
-  display: flow-root;
+  display: table;
   padding-left: 2px;
 }
 .popup .inputs input[type='text'] {
@@ -634,9 +634,12 @@ i.icon-arrow-right {
 .popup input[type='radio'] {
   box-shadow: none;
 }
-.popup .inputs .note {
+.popup .note {
   margin-top: 4px;
   line-height: 1.2em;
+}
+.popup .note > div {
+  text-indent: 10px;
 }
 /* ScrollBaseView */
 .popup .expand-icon {
@@ -696,9 +699,12 @@ i.icon-arrow-right {
   background-position: 0 50%;
   background-repeat: no-repeat;
 }
+.popup fieldset > label {
+  display: table;
+}
 /* BookmarkView */
 .bookmarks {
-  width: 600px;
+  width: 700px;
 }
 .bookmarks form {
   padding-left: 5px;
@@ -730,6 +736,7 @@ i.icon-arrow-right {
   background-color: white;
   border-radius: 5px;
   border: 1px solid #999999;
+  margin-top: 20px;
   margin-bottom: 6px;
   font-size: 1.0em;
 }
@@ -771,16 +778,18 @@ i.icon-arrow-right {
   font-weight: bold;
   color: #333333;
 }
-.caption {
+.commandOptions .caption {
   width: 400px;
-  margin-top: 15px;
+  margin-top: 13px;
 }
 .commandOptions.popup {
-  padding-bottom: 5px;
+  padding-bottom: 9px;
 }
 .commandOptions .inputs {
+  float: right;
   padding: 0;
   line-height: 1.3em;
+  margin-right: 40px;
 }
 .commandOptions .content {
   width: 100%;
@@ -798,9 +807,6 @@ i.icon-arrow-right {
 .commandOptions .otherinput label {
   margin-top: 5px;
 }
-.commandOptions .panel1 {
-  float: left;
-}
 .commandOptions .inputs label {
   padding-left: 15px;
   font-size: 0.9em;
@@ -811,8 +817,9 @@ i.icon-arrow-right {
 }
 .commandOptions .btn-group {
   position: absolute;
-  right: 10px;
-  top: 60px;
+  right: 35px;
+  top: 100px;
+  z-index: 3;
 }
 .commandOptions .btn-group input[name="coffeePreview"] {
   width: 0;
@@ -881,11 +888,11 @@ i.icon-arrow-right {
 .commandParams input[type='text'] {
   width: 450px;
 }
-.optionExtProg .done {
-  margin-right: 50px;
-}
 .optionExtProg .progPath {
-  width: 450px;
+  width: 500px;
+}
+.optionExtProg span.shortcut {
+  margin-right: 35px;
 }
 .ctxmenu-icon {
   width: 18px;
@@ -968,7 +975,8 @@ i.icon-arrow-right {
   padding: 5px;
   padding-left: 15px;
 }
-.ctxMenuManager .editButtons button {
+.ctxMenuManager .editButtons > button {
+  display: table;
   text-align: left;
   margin-top: 8px;
   width: 105px;

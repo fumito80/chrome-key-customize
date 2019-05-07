@@ -609,7 +609,9 @@ i.icon-arrow-right {
   margin-left: 5px;
 }
 .popup .delete {
-  margin-right: 60px;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 .popup .inputs {
   padding: 10px;
@@ -757,8 +759,8 @@ i.icon-arrow-right {
 .commands {
   padding-bottom: 30px;
 }
-.commands form {
-  padding: 10px 30px 0px 10px;
+.commands .commandRadios {
+  margin-top: 20px;
 }
 .commands .commandRadios div {
   padding: 3px;
@@ -778,7 +780,7 @@ i.icon-arrow-right {
   font-weight: bold;
   color: #333333;
 }
-.commandOptions .caption {
+.popup .caption {
   width: 400px;
   margin-top: 13px;
 }
@@ -927,6 +929,9 @@ i.icon-arrow-right {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
+.ctxMenuOptions fieldset {
+  position: relative;
+}
 /*** Context Menu Manger ***/
 .ctxMenuManager .panel1 {
   padding-left: 10px;
@@ -972,6 +977,7 @@ i.icon-arrow-right {
 }
 .ctxMenuManager .editButtons {
   float: right;
+  margin-top: 15px;
   padding: 5px;
   padding-left: 15px;
 }
@@ -981,9 +987,6 @@ i.icon-arrow-right {
   margin-top: 8px;
   width: 105px;
   font-size: 0.9em;
-}
-.ctxMenuManager .delete {
-  margin-right: 15px;
 }
 .ctxMenuManager div.contexts {
   margin-top: 10px;
@@ -1053,6 +1056,9 @@ i.icon-arrow-right {
   border: 1px solid #FF1E93;
   height: 18px;
   margin-left: 20px;
+}
+.ctxMenuManager input[type='text'] {
+  height: 20px;
 }
 .ctxMenus .ui-placeholder {
   margin-left: 22px;

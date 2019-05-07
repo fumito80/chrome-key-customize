@@ -1180,13 +1180,13 @@ class CtxMenuManagerView extends ExplorerBaseView
     <div class="folder hasFolder" id="<%=id%>">
       <span class="title" tabindex="0"><div class="sortable"></div><%=title%></span>
       <div class="emptyFolder"></div>
-      <form class="editCaption"><input type="text"></form>
+      <form class="editCaption"><input type="text" class="form-control"></form>
       <div class="ctxMenus"></div>
     </div>
     """
   tmplMenuItem: _.template """
     <div class="ctxMenuItem<%=route%>" id="<%=id%>">
       <span class="menuCaption" tabindex="0" title="<%=shortcut%>"><%=caption%><div class="sortable"></div></span>
-      <form class="editCaption"><input type="text"></form>
+      <form class="editCaption"><input type="text" class="form-control"></form>
     </div>
     """

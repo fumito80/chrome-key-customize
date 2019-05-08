@@ -507,7 +507,7 @@ KeyConfigView = Backbone.View.extend
       else
         msg = "Are you sure you want to delete this shortcut?"
       shortcut = decodeKbdEvent @model.id
-      msg += "\n\n Shortcut key: #{shortcut}\n Description: \"#{@getDescription()}\""
+      msg += "\n\n Mapped key: #{shortcut}\n Description: \"#{@getDescription()}\""
     if confirm msg
       children.forEach (child) =>
         @trigger "removeConfig", child
@@ -741,7 +741,7 @@ KeyConfigView = Backbone.View.extend
     @onChangeCtxmenu()
 
   tmplDesc: _.template """
-    <button class="btn btn-light btn-sm cog" title="Sub Menu"><i class="icon-ellipsis-horizontal"></i></button>
+    <button class="btn btn-outline-primary btn-sm cog" title="Sub Menu"><i class="icon-ellipsis-horizontal"></i></button>
     <div class="selectCog" tabIndex="0">
       <div class="edit"><i class="<%=iconName%>"></i> <%=command%></div>
       <div class="addCommand"><i class="icon-plus"></i> Add command</div>
@@ -758,8 +758,8 @@ KeyConfigView = Backbone.View.extend
 
   tmplUpDown: """
     <div class="btn-group updown">
-      <button class="btn btn-light btn-sm" title="up"><i class="icon-chevron-up"></i></button>
-  	  <button class="btn btn-light btn-sm" title="down"><i class="icon-chevron-down"></i></button>
+      <button class="btn btn-outline-primary btn-sm" title="up"><i class="icon-chevron-up"></i></button>
+  	  <button class="btn btn-outline-primary btn-sm" title="down"><i class="icon-chevron-down"></i></button>
   	</div>
     """
 

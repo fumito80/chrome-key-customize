@@ -937,7 +937,7 @@ i.icon-arrow-right {
   padding-left: 10px;
 }
 .ctxMenuManager .result {
-  padding: 5px 15px 45px 15px;
+  padding: 15px 15px 45px 15px;
 }
 .ctxMenuManager .contextIcon {
   display: inline-block;
@@ -1107,10 +1107,8 @@ i.icon-arrow-right {
   text-align: center;
 }
 .ctxMenusGetter .buttons button {
+  float: none;
   width: 100px;
-  margin-left: 3px;
-  margin-right: 3px;
-  padding: 7px 10px;
 }
 .keyConfigSetView .data.ui-selected {
   background: #FCC;
@@ -1210,6 +1208,9 @@ tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
 }
 .settingsView label {
   padding-top: 5px;
+}
+.settingsView .label {
+  margin-right: 10px;
 }
 .settingsView textarea {
   width: 600px;

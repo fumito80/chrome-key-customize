@@ -49,7 +49,7 @@
     <form>
       <div class="panel1">
         <span class="h7">Settings</span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs" style="padding-bottom: 0">
@@ -60,21 +60,21 @@
           <input type="checkbox" class="wheelSwitches"> Switches tab with mouse wheel
         </label>
         <label>
-          <div>Time interval between keystrokes for keyboard macro:</div>
+          <span class="label">Time interval between keystrokes for keyboard macro:</span>
           <input type="number" class="sleepMSec" min="0" max="1000" step="1" value="100" required> milliseconds
         </label>
         <label>
-          <div>Keyboard type:</div>
+          <span class="label">Keyboard type:</span>
           <select class="kbdtype"></select>
         </label>
         <label>
-          <div>Language of keyboard shortcuts help:</div>
+          <span class="label">Language of keyboard shortcuts help:</span>
           <select class="lang"></select>
         </label>
         <div class="loadIcon2">
-          <input type="file" class="loadIcon" accept="image/x-png">
-          <img class="customIcon" src="images/default.png">
           <button class="btn btn-light btn-sm btnLoadIcon"><i class="fa fa-refresh"></i> Change app icon...</button>
+          <img class="customIcon" src="images/default.png">
+          <input type="file" class="loadIcon" accept="image/x-png">
         </div>
       </div>
     </form>
@@ -108,7 +108,7 @@
       <div class="panel1">Bookmark for <span class="shortcut"></span>
         <input type="text" class="form-control query" size="16" placeholder="Get all"><button type="submit"><i class="icon-search"></i></button>
         <label><input type="checkbox" class="expandAll"> Expand all</label>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
       </div>
     </form>
     <div class="result_outer">
@@ -118,7 +118,7 @@
   <div class="popup commands">
     <form>
       <div>Command for <span class="shortcut"></span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="commandRadios"></div>
@@ -126,7 +126,7 @@
   </div>
   <div class="popup commandOptions">
     <form>
-      <button type="button" class="btn btn-light cancel">Cancel</button>
+      <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
       <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       <div class="inputs"></div>
       <div class="panel1">
@@ -148,7 +148,7 @@
           <span>Coffee</span>
         </label>
         <input type="radio" name="coffeePreview" id="radioPreview" value="javascript" autocomplete="off">
-        <label class="btn btn-dark btn-sm" for="radioPreview">Transpile preview</label>
+        <label class="btn btn-dark btn-sm" for="radioPreview">JS preview</label>
       </div>
       <div class="otherinput"></div>
     </form>
@@ -157,7 +157,7 @@
     <form>
       <div class="panel1">
         <span class="command">Open URL from external program</span> for <span class="shortcut"></span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
@@ -175,7 +175,7 @@
     <form>
       <div class="panel1">
         Bookmark for <span class="shortcut"></span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
@@ -218,7 +218,7 @@
     <form>
       <div class="panel1">
         Context Menu for <span class="shortcut"></span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
       <div class="inputs">
@@ -253,7 +253,7 @@
   <div class="popup ctxMenuManager">
     <form>
       <div class="panel1">Context Menu Manager</span>
-        <button type="button" class="btn btn-light cancel">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary cancel">Cancel</button>
         <button type="submit" class="btn btn-primary done"><i class="icon-ok"></i> Done</button>
       </div>
     </form>
@@ -264,10 +264,10 @@
       <div class="result"></div>
     </div>
     <div class="editButtons"> 
-      <button class="btn btn-secondary btn-sm newmenu disabled" disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button>
-      <button class="btn btn-secondary btn-sm newfolder disabled" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button>
-      <button class="btn btn-secondary btn-sm rename disabled" disabled="disabled"><i class="icon-pencil"></i> Rename</a></button>
-      <button class="btn btn-secondary btn-sm remove disabled" disabled="disabled"><i class="icon-trash"></i> Remove</a></button>
+      <button class="btn btn-outline-primary btn-sm newmenu"   disabled="disabled"><i class="icon-plus-sign"></i> Add Menu</a></button>
+      <button class="btn btn-outline-primary btn-sm newfolder" disabled="disabled"><i class="icon-folder-close-alt"></i> Add Folder</a></button>
+      <button class="btn btn-outline-primary btn-sm rename"    disabled="disabled"><i class="icon-pencil"></i> Rename</a></button>
+      <button class="btn btn-outline-primary btn-sm remove"    disabled="disabled"><i class="icon-trash"></i> Remove</a></button>
     </div>
   </div>
   <div class="popup ctxMenusGetter">
@@ -275,7 +275,7 @@
       <div class="message"></div>
       <div class="buttons">
         <button class="btn btn-primary btn-sm add"><i class="icon-plus-sign"></i> Add</button>
-        <button class="btn btn-light btn-sm cancel"><i class="icon-ban-circle"></i> Cancel</button>
+        <button class="btn btn-outline-secondary btn-sm cancel">Cancel</button>
       </div>
     </div>
   </div>

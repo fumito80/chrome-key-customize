@@ -83,19 +83,23 @@ class ExplorerBaseView extends PopupBaseView
       cursoropacitymin: .1
       cursoropacitymax: .6
     @elResult$ = @$(".result")
+  showNiceScroll: ->
+    @$(".result_outer").getNiceScroll().show().resize()
+  hideNiceScroll: ->
+    @$(".result_outer").getNiceScroll().hide()
   onShowPopup: (name, model) ->
     unless super(name, model)
-      @$(".result_outer").getNiceScroll().hide()
+      @hideNiceScroll()
       return false
-    @$(".result_outer").getNiceScroll().show()
+    @showNiceScroll()
     true
   onStartDrag: ->
-    @$(".result_outer").getNiceScroll().hide()
+    @hideNiceScroll()
   onStopDrag: ->
-    @$(".result_outer").getNiceScroll().show().resize()
+    @showNiceScroll()
   onHidePopup: ->
     if @$el.is(":visible")
-      @onStartDrag()
+      @hideNiceScroll()
       super()
   onClickExpandAll: ->
     if @$(".expandAll").is(":checked")
@@ -392,6 +396,8 @@ class CommandOptionsView extends ExplorerBaseView
     @$(".content_outer").resizable
       minWidth: 650
       minHeight: 100
+      start: @hideNiceScroll.bind(@)
+      stop: @showNiceScroll.bind(@)
   render: ->
     @optionsName = "command"
     if @commandName? and @commandName isnt @options?.name
@@ -450,7 +456,10 @@ class CommandOptionsView extends ExplorerBaseView
         content = if cmMode is "x-coffeescript" then content else @coffee
         result = andy.coffee2JS @model.id, content
         unless result.success
-          unless confirm "A compilation error has occurred, but do you continue?\n\n  Line: #{result.errLine}\n  Error: #{result.err}"
+          line = result.errLine
+          unless confirm "A compilation error has occurred, but do you continue?\n\n  Line: #{line}\n  Error: #{result.err}"
+            @editer.focus()
+            @editer.setSelection { "line": line, "ch": 0 },  { "line": line - 1, "ch": 0 }, { "scroll": true }
             return false
       if @options.name isnt "execJS" || cmMode is "x-coffeescript"
         @undoData = @editer.getHistory()
@@ -486,7 +495,11 @@ class CommandOptionsView extends ExplorerBaseView
           value = CoffeeScript.compile (@coffee = @editer.getValue()), bare: "on"
           @undoData = @editer.getHistory()
         catch e
-          alert "A compilation error has occurred.\n\n  Line: #{e.location.first_line+1}\n  Error: #{e.message}"
+          line = e.location.first_line + 1
+          @editer.setSelection { "line": line, "ch": 0 },  { "line": line - 1, "ch": 0 }, { "scroll": true }
+          alert "A compilation error has occurred.\n\n  Line: #{line}\n  Error: #{e.message}"
+          @$("#radioCoffee").prop("checked", true)
+          @editer.focus()
           return
         #@editer.setOption "theme", "elegant"
       else
@@ -677,6 +690,8 @@ class BookmarksView extends ExplorerBaseView
       chrome.bookmarks.getRecent 50, (treeNode) =>
         treeNode.forEach (node) =>
           @digBookmarks node, recent, query, 1, state
+        if event
+          @showNiceScroll()
     false
   digBookmarks: (node, parent, query, indent, state) ->
     if node.title
@@ -701,16 +716,14 @@ class BookmarksView extends ExplorerBaseView
       target$.removeClass("opened expanded")
     else
       target$.addClass("opened expanded")
-    windowOnResize()
-    event.stopPropagation()
+    @showNiceScroll()
   onClickExpandIcon: (event) ->
     expanded = (target$ = $(event.currentTarget).parent()).hasClass("expanded")
     if expanded
       target$.removeClass("expanded")
     else
       target$.addClass("expanded")
-    windowOnResize()
-    event.stopPropagation()
+    @showNiceScroll()
   onClickBookmark: (event) ->
     target$ = $(event.currentTarget)
     @trigger "showPopup", "bookmarkOptions", @model.id, target$.attr("data-id")
@@ -1036,7 +1049,7 @@ class CtxMenuManagerView extends ExplorerBaseView
     @setSortable ".ctxMenus", ".menuCaption", @onUpdateMenu
     @$(".folders").sortable "refresh"
     @setFolderDroppable newFolder$
-    @enableButton ["rename", "remove", "newmenu"]
+    @disableButton ["rename", "remove", "newmenu"], false
     @disableButton ["newfolder"]
     @onClickRen event
   onKeydownCaption: (event) ->
@@ -1074,22 +1087,19 @@ class CtxMenuManagerView extends ExplorerBaseView
     active$.parent().remove()
     @onUpdateMenu null, null, @
     @onUpdateFolder null, null, @
-  enableButton: (buttonClasses) ->
-    buttonClasses.forEach (className) =>
-      @$("." + className).removeClass("disabled").removeAttr("disabled")
-  disableButton: (buttonClasses) ->
-    buttonClasses.forEach (className) =>
-      @$("." + className).addClass("disabled").attr("disabled", "disabled")
+  disableButton: (buttonClasses, disabled = true) ->
+    selector = buttonClasses.map((className) -> "." + className).join(",")
+    @$(selector).prop("disabled", disabled)
   onClickItem: (event) ->
     switch event.currentTarget.className
       when "contexts"
-        @enableButton  ["newmenu", "newfolder"]
+        @disableButton ["newmenu", "newfolder"], false
         @disableButton ["rename", "remove"]
       when "title"
-        @enableButton  ["rename", "remove", "newmenu"]
+        @disableButton ["rename", "remove", "newmenu"], false
         @disableButton ["newfolder"]
       when "menuCaption"
-        @enableButton  ["rename", "remove"]
+        @disableButton ["rename", "remove"], false
         @disableButton ["newmenu", "newfolder"]
     event.currentTarget.focus()
     event.preventDefault()

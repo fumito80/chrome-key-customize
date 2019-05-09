@@ -60,6 +60,8 @@ type
   TShareData = record
     hookKey, hookMouse, hookMouseWheel: HHOOK;
     keyPipeName, mousePipeName: array[0..255] of AnsiChar;
+    hWnd: HWND;
+    mouseX, mouseY: Longint;
     inWheelTabArea: Boolean;
   end;
   pShareData = ^TShareData;
@@ -67,6 +69,7 @@ type
 const
   FILE_MAPPING_NAME = 'scware1';
   CHROME_CLASS_NAME = 'Chrome_WidgetWin_1';
+  CHROME_CLASS_RENDER = 'Chrome_RenderWidgetHostHWND';
   INPUT_KEYBOARD = 1;
 
   SCAN_LCONTROL  =  $1D;

@@ -1185,16 +1185,16 @@ KeyConfigSetView = Backbone.View.extend
   template: _.template """
     <thead>
       <tr>
-        <th>
+        <th class="thRemap">
           <div class="th_inner">Mapped key</div>
         </th>
-        <th class="remap_arrow">
+        <th class="thArrow">
           <div class="th_inner"><i class="icon-arrow-right"></i></div>
         </th>
-        <th>
+        <th class="thOrigin">
           <div class="th_inner">Origin key</div>
         </th>
-        <th>
+        <th class="thOptions">
           <div class="th_inner options">Mode</div>
         </th>
         <th class="ctxmenu"></th>

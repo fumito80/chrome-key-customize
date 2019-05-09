@@ -148,7 +148,12 @@ end;
 procedure ExecUrl(prog, url: String);
 begin
   if (prog <> '') then begin
-    ShellExecute(0, PChar('open'), PAnsiChar(prog), PChar(url), nil, SW_SHOWNORMAL);
+    if (prog = 'edge') then begin
+      ShellExecute(0, PChar('open'), PAnsiChar('microsoft-edge:' + url), nil, nil, SW_SHOWNORMAL);
+    end
+    else begin
+      ShellExecute(0, PChar('open'), PAnsiChar(prog), PChar(url), nil, SW_SHOWNORMAL);
+    end;
   end;
 end;
 

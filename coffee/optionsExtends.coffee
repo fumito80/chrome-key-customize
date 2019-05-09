@@ -340,7 +340,7 @@ class OptionExtProgView extends PopupBaseView
         @$(".progPath").val value
         value = "other"
     else
-      value = "iexplore"
+      value = "firefox"
     @$("input[name='program'][value='#{value}']")[0].checked = true
   onChangeProgram: (event) ->
     if @$("input[name='program'][value='other']").is(":checked")
@@ -360,7 +360,7 @@ class OptionExtProgView extends PopupBaseView
               name: "openExtProg"
               caption: caption
               content: content
-          {silent: true}
+          { silent: true }
         .trigger "change:command"
       @hidePopup()
     false

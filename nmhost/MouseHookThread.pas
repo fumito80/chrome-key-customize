@@ -42,6 +42,10 @@ const
   MSG_MOUSE_WHEEL = WM_MOUSEWHEEL  - $0200;
   WM_WHEEL_UP    = $020B;
   WM_WHEEL_DOWN  = $020D;
+  WM_GST_UP      = $021B;
+  WM_GST_DOWN    = $021D;
+  WM_GST_LEFT    = $022B;
+  WM_GST_RIGHT   = $022D;
   FLAG_LDOWN = 16;
   FLAG_RDOWN = 32;
   FLAG_MDOWN = 64;
@@ -59,10 +63,18 @@ function TMouseHookTh.VaridateEvent(wPrm: UInt64): Boolean;
 begin
   Result:= False;
   modifierFlags:= FLAG_RDOWN;
+  //scans:= '00' + IntToStr(wPrm);
   scans:= IntToHex(modifierFlags, 2) + IntToStr(wPrm);
-  KeyInputCount:= 0;
-  SetLength(KeyInputs, 0);
-  SetLength(newScans, 0);
+
+  if configMode and (keyDownState = 0) then begin
+    Result:= True;
+    PostToChrome('configKeyEvent', scans);
+  end else begin
+
+    //scans:= IntToHex(modifierFlags, 2) + IntToStr(wPrm);
+    KeyInputCount:= 0;
+    SetLength(KeyInputs, 0);
+    SetLength(newScans, 0);
 
     index:= keyConfigList.IndexOf(scans);
     if index > -1 then begin
@@ -124,6 +136,7 @@ begin
         SendInput(KeyInputCount, @KeyInputs[0], SizeOf(KeyInputs[0]));
       end;
     end;
+  end;
 end;
 
 end.

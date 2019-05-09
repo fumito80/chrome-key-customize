@@ -121,31 +121,77 @@ begin
 end;
 
 function MouseHookFunc(code: Integer; wPrm: WPARAM; lPrm: LPARAM): LRESULT; stdcall;
+  function getGestureDir(moveX, moveY: LongInt): UInt64;
+  begin
+    if (abs(moveX) < 50) and (abs(moveY) < 50) then begin
+      Exit (0);
+    end;
+    if abs(moveX) > abs(moveY) then begin
+      if (moveX > 0) then begin
+        Exit (WM_GST_RIGHT);
+      end else begin
+        Exit (WM_GST_LEFT);
+      end;
+    end else begin
+      if (moveY > 0) then begin
+        Exit (WM_GST_DOWN);
+      end else begin
+        Exit (WM_GST_UP);
+      end;
+    end;
+  end;
 var
   buf: array[0..1000] of AnsiChar;
   _hFMOBJ: THandle = 0;
   p: Pointer = nil;
   pMHS: PMouseHookStruct;
+  cancelFlag: Boolean;
+  bytesRead: Cardinal = 0;
+  msgFlag: UInt64;
 begin
   GetFileMapObj(_hFMOBJ, p);
   try
     with pShareData(p)^ do begin
-      if (code <> HC_ACTION) or (wPrm <> WM_MOUSEMOVE) then begin
+      if (code <> HC_ACTION) or ((wPrm <> WM_MOUSEMOVE) and (wPrm <> WM_LBUTTONDOWN) and (wPrm <> WM_LBUTTONUP)) then begin
         Result:= CallNextHookEx(0, code, wPrm, lPrm);
         Exit;
       end;
       pMHS:= PMouseHookStruct(lPrm);
       GetClassName(pMHS^.hwnd, buf, SizeOf(buf));
       if AnsiStartsText(CHROME_CLASS_NAME, buf) then begin
+        if (wPrm = WM_MOUSEMOVE) then begin
+          ScreenToClient(pMHS^.hwnd, pMHS^.pt);
+          //Write2EventLog('FlexKbd MouseMove x,y', IntToStr(pMHS^.pt.X) + ',' + IntToStr(pMHS^.pt.Y), EVENTLOG_INFORMATION_TYPE);
+          if (pMHS^.pt.y < 50) then begin
+            inWheelTabArea:= True;
+          end else begin
+            inWheelTabArea:= False;
+          end;
+        end else if (wPrm = WM_LBUTTONUP) then begin
+          if (mouseX > 0) then begin
+            ScreenToClient(hWnd, pMHS^.pt);
+            msgFlag:= getGestureDir(pMHS^.pt.x - mouseX, pMHS^.pt.y - mouseY);
+            if (msgFlag > 0) then begin
+              CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
+              if cancelFlag then begin
+                PMsg(lPrm)^.message:= WM_NULL;
+              end;
+            end;
+            Write2EventLog('FlexKbd WM_NCLBUTTONUP x,y', IntToStr(pMHS^.pt.x - mouseX) + ',' + IntToStr(pMHS^.pt.y - mouseY) + ',' + IntToStr(msgFlag), EVENTLOG_INFORMATION_TYPE);
+            mouseX:= 0;
+          end;
+        end;
+      end else if AnsiStartsText(CHROME_CLASS_RENDER, buf) then begin
         ScreenToClient(pMHS^.hwnd, pMHS^.pt);
-        //Write2EventLog('FlexKbd MouseMove x,y', IntToStr(pMHS^.pt.X) + ',' + IntToStr(pMHS^.pt.Y), EVENTLOG_INFORMATION_TYPE);
-        if (pMHS^.pt.Y < 50) then begin
-          inWheelTabArea:= True;
-        end else begin
-          inWheelTabArea:= False;
+        if (wPrm = WM_LBUTTONDOWN) then begin
+          hWnd:= pMHS^.hwnd;
+          mouseX:= pMHS^.pt.x;
+          mouseY:= pMHS^.pt.y;
+          Write2EventLog('FlexKbd WM_NCLBUTTONDOWN x,y', IntToStr(mouseX) + ',' + IntToStr(mouseY), EVENTLOG_INFORMATION_TYPE);
         end;
       end else begin
-        inWheelTabArea:= False;
+        //inWheelTabArea:= False;
+        //mouseX:= 0;
       end;
       Result:= CallNextHookEx(0, code, wPrm, lPrm);
     end;

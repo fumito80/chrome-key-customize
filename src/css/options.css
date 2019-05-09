@@ -177,19 +177,13 @@ footer.scrolling {
 .keyConfigSetView thead th {
   border: 0;
   font-weight: normal;
-  padding-left: 10px;
+  padding-left: 9px;
 }
 tbody .data:hover {
   background: lavender;
 }
 th, td {
   font-size: 0.9em;
-}
-.keyConfigSetView thead th.remap_arrow {
-  padding-left: 1px;
-}
-.keyConfigSetView tbody th.remap_arrow {
-  padding: 3px 5px;
 }
 .th_inner {
   position: absolute;
@@ -353,22 +347,30 @@ i.icon-arrow-right {
 .keyConfigSetView thead tr {
   border: none;
 }
+.keyConfigSetView thead .thRemap {
+  min-width: 90px;
+}
+.keyConfigSetView thead .thArrow {
+  min-width: 20px;
+  padding-left: 1px;
+}
+.keyConfigSetView thead .thOrigin {
+  min-width: 80px;
+}
+.keyConfigSetView thead .thOptions {
+  min-width: 40px;
+}
 .keyConfigSetView tbody td, .keyConfigSetView tbody th {
   border: 0;
 }
 .keyConfigSetView div.borderRow {
-  border-top: 1px dotted #999999;
+  border-top: 1px dotted #cccccc;
   padding: 0;
 }
-.keyConfigSetView .thRemap {
-  width: 80px;
+.keyConfigSetView tbody .thRemap {
   white-space: nowrap;
 }
-.keyConfigSetView .thArrow {
-  width: 20px;
-}
-.keyConfigSetView .thOrigin {
-  width: 80px;
+.keyConfigSetView tbody .thOrigin {
   height: 32px;
   white-space: nowrap;
 }

@@ -5,6 +5,7 @@ concat = require 'gulp-concat'
 tap    = require 'gulp-tap'
 zipfld = require 'zip-folder'
 del    = require 'del'
+rename = require 'gulp-rename'
 
 uglifyOrThru = ->
   if process.argv.includes 'prd'
@@ -61,3 +62,22 @@ exports.coffee = series(
 )
 
 exports.default = exports.prd = build
+
+# nmh
+nmh_clean = (cb) ->
+  del [process.env.LOCALAPPDATA + '/Shortcutware/Flexkbd64.*'], force: true, cb
+
+nmh_cp_dll = ->
+  src 'nmhost/Flexkbd64_dll.dll'
+    .pipe rename 'Flexkbd64.dll'
+    .pipe dest process.env.LOCALAPPDATA + '/Shortcutware'
+
+nmh_cp_exe = ->
+  src 'nmhost/Flexkbd64.exe'
+    .pipe dest process.env.LOCALAPPDATA + '/Shortcutware'
+
+exports.nmh = series(
+  nmh_clean
+  nmh_cp_dll
+  nmh_cp_exe
+)

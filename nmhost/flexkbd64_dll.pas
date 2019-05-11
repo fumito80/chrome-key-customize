@@ -21,7 +21,8 @@ var
   keyHookTh: TKeyHookTh;
   mouseHookTh: TMouseHookTh;
   keyConfigList: TStringList;
-  g_mouseHookF: Boolean;
+  g_mouseWheelF: Boolean = False;
+  g_mouseGesturesF: Boolean = False;
 
 procedure EndHook(p: Pointer); forward;
 procedure EndMouseHook(p: Pointer); forward;
@@ -67,6 +68,8 @@ begin
       StrCopy(keyPipeName, PAnsiChar(keyPipeNameIn));
       StrCopy(mousePipeName, PAnsiChar(mousePipeNameIn));
       inWheelTabArea:= False;
+      mouseWheelF:= False;
+      mouseGesturesF:= False;
     end;
   finally
     ReleaseFileMapObj(_hFMOBJ, p);
@@ -97,22 +100,19 @@ var
   _hFMOBJ: THandle = 0;
   p: Pointer = nil;
 begin
-  //Result:= CallNextHookEx(0, code, wPrm, lPrm);
-  //Exit;
-  //Write2EventLog('FlexKbd KeyHookFunc', IntToStr(wPrm), EVENTLOG_INFORMATION_TYPE);
+  if (code < HC_ACTION) then begin
+    Exit (CallNextHookEx(0, code, wPrm, lPrm));
+  end;
+
   GetFileMapObj(_hFMOBJ, p);
   try
     with pShareData(p)^ do begin
-      if (code < HC_ACTION) then begin
-        Result:= CallNextHookEx(0, code, wPrm, lPrm);
-        Exit;
-      end;
       CallNamedPipe(keyPipeName, @lPrm, SizeOf(lPrm), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
-      //Write2EventLog('FlexKbd KeyPipeName', keyPipeName, EVENTLOG_INFORMATION_TYPE);
       if cancelFlag then begin
-        Result:= 1
+        //PMsg(lPrm)^.message:= WM_NULL; // Bad code!
+        Exit (1);
       end else begin
-        Result:= CallNextHookEx(0, code, wPrm, lPrm);
+        Exit (CallNextHookEx(0, code, wPrm, lPrm));
       end;
     end;
   finally
@@ -123,7 +123,7 @@ end;
 function MouseHookFunc(code: Integer; wPrm: WPARAM; lPrm: LPARAM): LRESULT; stdcall;
   function getGestureDir(moveX, moveY: LongInt): UInt64;
   begin
-    if (abs(moveX) < 50) and (abs(moveY) < 50) then begin
+    if (abs(moveX) < 30) and (abs(moveY) < 30) then begin
       Exit (0);
     end;
     if abs(moveX) > abs(moveY) then begin
@@ -149,52 +149,49 @@ var
   bytesRead: Cardinal = 0;
   msgFlag: UInt64;
 begin
+  if (code <> HC_ACTION) or ((wPrm <> WM_MOUSEMOVE) and (wPrm <> WM_RBUTTONDOWN) and (wPrm <> WM_RBUTTONUP)) then begin
+    Exit (CallNextHookEx(0, code, wPrm, lPrm));
+  end;
+
   GetFileMapObj(_hFMOBJ, p);
   try
     with pShareData(p)^ do begin
-      if (code <> HC_ACTION) or ((wPrm <> WM_MOUSEMOVE) and (wPrm <> WM_LBUTTONDOWN) and (wPrm <> WM_LBUTTONUP)) then begin
-        Result:= CallNextHookEx(0, code, wPrm, lPrm);
-        Exit;
-      end;
       pMHS:= PMouseHookStruct(lPrm);
       GetClassName(pMHS^.hwnd, buf, SizeOf(buf));
-      if AnsiStartsText(CHROME_CLASS_NAME, buf) then begin
-        if (wPrm = WM_MOUSEMOVE) then begin
-          ScreenToClient(pMHS^.hwnd, pMHS^.pt);
-          //Write2EventLog('FlexKbd MouseMove x,y', IntToStr(pMHS^.pt.X) + ',' + IntToStr(pMHS^.pt.Y), EVENTLOG_INFORMATION_TYPE);
-          if (pMHS^.pt.y < 50) then begin
-            inWheelTabArea:= True;
-          end else begin
-            inWheelTabArea:= False;
-          end;
-        end else if (wPrm = WM_LBUTTONUP) then begin
+      if (wPrm = WM_MOUSEMOVE) and (mouseWheelF) and (AnsiStartsText(CHROME_CLASS_WIDGET, buf)) then begin
+        // on Mouse Wheel
+        ScreenToClient(pMHS^.hwnd, pMHS^.pt);
+        if (pMHS^.pt.y < 50) then begin
+          inWheelTabArea:= True;
+        end else begin
+          inWheelTabArea:= False;
+        end;
+      end else if ((wPrm = WM_RBUTTONDOWN) or (wPrm = WM_RBUTTONUP)) and (mouseGesturesF)
+          and (AnsiStartsText(CHROME_CLASS_WIDGET, buf) or AnsiStartsText(CHROME_CLASS_RENDER, buf)) then begin
+        if (wPrm = WM_RBUTTONDOWN) then begin
+          // on Mouse right-click button down
+          hWnd:= pMHS^.hwnd;
+          ScreenToClient(hWnd, pMHS^.pt);
+          mouseX:= pMHS^.pt.x;
+          mouseY:= pMHS^.pt.y;
+        end else if (wPrm = WM_RBUTTONUP) then begin
+          // on Mouse right-click button up
           if (mouseX > 0) then begin
             ScreenToClient(hWnd, pMHS^.pt);
             msgFlag:= getGestureDir(pMHS^.pt.x - mouseX, pMHS^.pt.y - mouseY);
             if (msgFlag > 0) then begin
               CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
-              if cancelFlag then begin
+              if (cancelFlag) then begin
                 PMsg(lPrm)^.message:= WM_NULL;
+                Exit (1);
               end;
             end;
-            Write2EventLog('FlexKbd WM_NCLBUTTONUP x,y', IntToStr(pMHS^.pt.x - mouseX) + ',' + IntToStr(pMHS^.pt.y - mouseY) + ',' + IntToStr(msgFlag), EVENTLOG_INFORMATION_TYPE);
             mouseX:= 0;
           end;
         end;
-      end else if AnsiStartsText(CHROME_CLASS_RENDER, buf) then begin
-        ScreenToClient(pMHS^.hwnd, pMHS^.pt);
-        if (wPrm = WM_LBUTTONDOWN) then begin
-          hWnd:= pMHS^.hwnd;
-          mouseX:= pMHS^.pt.x;
-          mouseY:= pMHS^.pt.y;
-          Write2EventLog('FlexKbd WM_NCLBUTTONDOWN x,y', IntToStr(mouseX) + ',' + IntToStr(mouseY), EVENTLOG_INFORMATION_TYPE);
-        end;
-      end else begin
-        //inWheelTabArea:= False;
-        //mouseX:= 0;
       end;
-      Result:= CallNextHookEx(0, code, wPrm, lPrm);
     end;
+    Exit (CallNextHookEx(0, code, wPrm, lPrm));
   finally
     ReleaseFileMapObj(_hFMOBJ, p);
   end;
@@ -209,28 +206,29 @@ var
   _hFMOBJ: THandle = 0;
   p: Pointer = nil;
 begin
+  if (code <> HC_ACTION) or (wPrm <> HC_ACTION) then begin
+    Exit (CallNextHookEx(0, code, wPrm, lPrm));
+  end;
+
   GetFileMapObj(_hFMOBJ, p);
   try
     with pShareData(p)^ do begin
-      if not inWheelTabArea or (code <> HC_ACTION) or (wPrm <> HC_ACTION) then begin
-        Result:= CallNextHookEx(0, code, wPrm, lPrm);
-        Exit;
+      if (not inWheelTabArea) then begin
+        Exit (CallNextHookEx(0, code, wPrm, lPrm));
       end;
       msg:= PMsg(lPrm)^;
       if (msg.message = WM_MOUSEWHEEL) then begin
-        //Write2EventLog('FlexKbd WH_GETMESSAGE wParam', IntToStr(msg.wParam), EVENTLOG_INFORMATION_TYPE);
         if SHORT(HIWORD(msg.wParam)) > 0 then begin
           msgFlag:= WM_WHEEL_UP
         end else begin
           msgFlag:= WM_WHEEL_DOWN;
         end;
         CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
-        if cancelFlag then begin
-          PMsg(lPrm)^.message:= WM_NULL;
-        end;
+        msg.message:= WM_NULL;
+        Exit (1);
       end;
-      Result:= CallNextHookEx(0, code, wPrm, lPrm);
     end;
+    Exit (CallNextHookEx(0, code, wPrm, lPrm));
   finally
     ReleaseFileMapObj(_hFMOBJ, p);
   end;
@@ -264,10 +262,11 @@ var
           Break;
       end;
     end;
-    Result:= scanCode;
+    Exit (scanCode);
   end;
 begin
-  g_mouseHookF:= False;
+  g_mouseWheelF:= False;
+  g_mouseGesturesF:= False;
   if params = '' then begin
     keyConfigList.Clear;
     ReconfigHook;
@@ -287,11 +286,18 @@ begin
       target:= paramList.Strings[0];
       targetModifierFlags:= StrToInt('$' + LeftBStr(target, 2));
       targetScanCode:= StrToInt(Copy(target, 3, 10));
-      if (targetScanCode = 525) then begin
-        g_mouseHookF:= True;
-      end;
 
       mode:= paramList.Strings[2];
+
+      if (targetScanCode = 1) then begin
+        if (mode = 'mousewheel') then begin
+          g_mouseWheelF:= true;
+          Continue;
+        end else if (mode = 'mouseGestures') then begin
+          g_mouseGesturesF:= true;
+          Continue;
+        end;
+      end;
 
       origin:= paramList.Strings[1];
       modifierFlags:= StrToInt('$' + LeftBStr(origin, 2));
@@ -361,7 +367,6 @@ begin
   with pShareData(p)^ do begin
     keyHookTh:= TKeyHookTh.Create(keyPipeName, hStdOut, keyConfigList, configMode);
     hookKey:= SetWindowsHookEx(WH_KEYBOARD, @KeyHookFunc, hInstance, tId);
-    //Write2EventLog('FlexKbd StartHook', IntToStr(hookKey), EVENTLOG_INFORMATION_TYPE);
   end;
 end;
 
@@ -371,7 +376,9 @@ begin
   with pShareData(p)^ do begin
     mouseHookTh:= TMouseHookTh.Create(mousePipeName, hStdOut, keyConfigList, False);
     hookMouse:= SetWindowsHookEx(WH_MOUSE, @MouseHookFunc, hInstance, tId);
-    hookMouseWheel:= SetWindowsHookEx(WH_GETMESSAGE, @MouseWheelHookFunc, hInstance, tId);
+    if (g_mouseWheelF) then begin
+      hookMouseWheel:= SetWindowsHookEx(WH_GETMESSAGE, @MouseWheelHookFunc, hInstance, tId);
+    end;
   end;
 end;
 
@@ -438,7 +445,9 @@ begin
         g_configMode:= configMode;
         CallNamedPipe(keyPipeName, @g_reloadConfig, SizeOf(UInt64), @dummyFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
       end;
-      if g_mouseHookF then begin
+      mouseWheelF:= g_mouseWheelF;
+      mouseGesturesF:= g_mouseGesturesF;
+      if (mouseWheelF) or (mouseGesturesF) then begin
         if (mouseHookTh = nil) then begin
           StartMouseHook(p);
         end else begin
@@ -457,7 +466,8 @@ exports
   StartConfigMode, EndConfigMode, SetKeyConfig, Initialize, Destroy;
 
 begin
-  g_mouseHookF:= False;
+  g_mouseWheelF:= False;
+  g_mouseGesturesF:= False;
   keyHookTh:= nil;
   mouseHookTh:= nil;
   modifiersCode[0]:= SCAN_LCONTROL;

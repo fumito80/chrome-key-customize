@@ -61,26 +61,23 @@ function TMouseHookTh.VaridateEvent(wPrm: UInt64): Boolean;
     KeybdInput(scans[index], KEYEVENTF_KEYUP);
   end;
 begin
-  Result:= False;
-  modifierFlags:= FLAG_RDOWN;
-  //scans:= '00' + IntToStr(wPrm);
-  scans:= IntToHex(modifierFlags, 2) + IntToStr(wPrm);
+  modifierFlags:= 0;
+  scans:= '00' + IntToStr(wPrm);
 
-  if configMode and (keyDownState = 0) then begin
-    Result:= True;
+  if (configMode) and (wPrm <> WM_WHEEL_UP) and (wPrm <> WM_WHEEL_DOWN) then begin
     PostToChrome('configKeyEvent', scans);
+    Exit (True);
+
   end else begin
-
-    //scans:= IntToHex(modifierFlags, 2) + IntToStr(wPrm);
-    KeyInputCount:= 0;
-    SetLength(KeyInputs, 0);
-    SetLength(newScans, 0);
-
     index:= keyConfigList.IndexOf(scans);
-    if index > -1 then begin
-      Result:= True;
+    if index = -1 then begin
+      Exit (False);
+    end else begin
       keyConfig:= TKeyConfig(keyConfigList.Objects[index]);
       if keyConfig.mode = 'remap' then begin
+        KeyInputCount:= 0;
+        SetLength(KeyInputs, 0);
+        SetLength(newScans, 0);
         modifiersBoth:= modifierFlags and keyConfig.modifierFlags;
         // CONTROL
         if (modifiersBoth and FLAG_CONTROL) <> 0 then begin
@@ -134,9 +131,14 @@ begin
         AddScan(keyConfig.scanCode);
         MakeKeyInputs(newScans, 0);
         SendInput(KeyInputCount, @KeyInputs[0], SizeOf(KeyInputs[0]));
+      end else if (keyConfig.mode = 'through') then begin
+        Exit (False);
+      end else begin
+        PostToChrome(keyConfig.mode, scans);
       end;
     end;
   end;
+  Exit (True);
 end;
 
 end.

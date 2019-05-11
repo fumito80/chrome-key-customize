@@ -135,6 +135,7 @@ class SettingsView extends PopupBaseView
     lang$ = @$(".lang")
     $.each langs, (key, item) =>
       lang$.append """<option value="#{key}">#{item[0]}</option>"""
+    # lang$.append """<option value="custom">Other...</option>"""
     # キーボード設定
     keys = keyCodes[@model.get("kbdtype")].keys
     selectKbd$ = @$(".kbdtype")
@@ -142,8 +143,8 @@ class SettingsView extends PopupBaseView
       selectKbd$.append """<option value="#{key}">#{item.name}</option>"""
     @model.trigger "change:lang"
   render: ->
-    @$(".singleKey")[0].checked = @model.get("singleKey")
-    @$(".wheelSwitches")[0].checked = @model.get("wheelSwitches")
+    ["singleKey", "wheelSwitches", "mouseGestures"].forEach (checkItem) =>
+      @$("." + checkItem)[0].checked = @model.get(checkItem)
     @$(".sleepMSec").val @model.get("defaultSleep")
     @$(".kbdtype").val @model.get("kbdtype")
     @$(".lang").val (@model.get("lang") || "ja")
@@ -182,6 +183,7 @@ class SettingsView extends PopupBaseView
       lang: @$(".lang").val()
       singleKey: @$(".singleKey").is(":checked")
       wheelSwitches: @$(".wheelSwitches").is(":checked")
+      mouseGestures: @$(".mouseGestures").is(":checked")
     if @customIcon
       @model.set customIcon: @customIcon
     @hidePopup()
@@ -394,7 +396,7 @@ class CommandOptionsView extends ExplorerBaseView
     @editer.lineAtHeight 18
     @setNiceScroll()
     @$(".content_outer").resizable
-      minWidth: 650
+      minWidth: 750
       minHeight: 100
       start: @hideNiceScroll.bind(@)
       stop: @showNiceScroll.bind(@)

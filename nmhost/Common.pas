@@ -62,13 +62,13 @@ type
     keyPipeName, mousePipeName: array[0..255] of AnsiChar;
     hWnd: HWND;
     mouseX, mouseY: Longint;
-    inWheelTabArea: Boolean;
+    mouseWheelF, mouseGesturesF, inWheelTabArea: Boolean;
   end;
   pShareData = ^TShareData;
 
 const
   FILE_MAPPING_NAME = 'scware1';
-  CHROME_CLASS_NAME = 'Chrome_WidgetWin_1';
+  CHROME_CLASS_WIDGET = 'Chrome_WidgetWin_1';
   CHROME_CLASS_RENDER = 'Chrome_RenderWidgetHostHWND';
   INPUT_KEYBOARD = 1;
 

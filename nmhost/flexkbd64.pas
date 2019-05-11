@@ -273,7 +273,7 @@ begin
   GetClassName(hParent, PChar(className), MAX_PATH);
   SetLength(className, StrLen(PChar(className)));
 
-  if className = CHROME_CLASS_NAME then begin
+  if className = CHROME_CLASS_WIDGET then begin
     threadID:= GetWindowThreadProcessId(hParent, pID);
     hHandle:= OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pID);
     exeNameLen:= MAX_PATH;

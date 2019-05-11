@@ -60,7 +60,7 @@ postNMH = (command, prm1, prm2, test) ->
             console.log msg.value
           when "doneAppInit"
             if keyConfigSet = andy.local.keyConfigSet
-              setConfigPlugin keyConfigSet, andy.local.config.wheelSwitches
+              setConfigPlugin keyConfigSet, andy.local.config
               createCtxMenus()
               keyConfigSet.forEach (item) ->
                 if item.mode is "command" && item.command.name is "execJS" && item.command.coffee
@@ -128,16 +128,14 @@ getScanCode = (keyName) ->
   { keys } = andy.getKeyCodes()[kbdtype]
   keys.findIndex (key) -> keyName is key?[0] || keyName is key?[1]
 
+modifierInits = ["c", "a", "s", "w"]
+
 execShortcut = (dfd, cbDone, transCode, scCode, sleepMSec, execMode, batchIndex) ->
   if transCode
     [test, modifiers, keyIdentifier] = transCode.exec(/\[(\w*?)\](.+)/) || [false]
     if (test)
       modifiersCode = modifiers.toLowerCase().split("").reduce (acc, c) ->
-        return acc + 1 if c is "c"
-        return acc + 2 if c is "a"
-        return acc + 4 if c is "s"
-        return acc + 8 if c is "w"
-        return acc
+        acc + Math.pow(2, modifierInits.indexOf(c))
       , 0
     else
       modifiersCode = 0
@@ -759,13 +757,15 @@ execCommand = (keyEvent) ->
             dfd.resolve()
   dfd.promise()
 
-setConfigPlugin = (keyConfigSet, wheelSwitches) ->
+setConfigPlugin = (keyConfigSet, { wheelSwitches, mouseGestures }) ->
   sendData = []
   if keyConfigSet
     { kbdtype } = andy.local.config
     { keys } = andy.getKeyCodes()[kbdtype]
     keyConfigSet.forEach (item) ->
       scanCode = ~~item.new.substring(2)
+      if 0x21B <= scanCode <= 0x22D
+        sendData.push [item.new, item.origin, item.mode].join(";")
       if /^00|^04/.test(item.new) && !/^F\d|^Application/.test(keys[scanCode]) && !/^045\d\d/.test(item.new)
         if item.new is "00768" and item.title
           chrome.browserAction.setTitle title: item.title
@@ -774,8 +774,11 @@ setConfigPlugin = (keyConfigSet, wheelSwitches) ->
       else if !/^C/.test item.new
         sendData.push [item.new, item.origin, item.mode].join(";")
   if wheelSwitches
-    sendData.push ["20525", "0115", "remap"].join(";")
-    sendData.push ["20523", "0515", "remap"].join(";")
+    sendData.push ["001", "", "mousewheel"].join(";")
+    sendData.push ["00525", "0115", "remap"].join(";")
+    sendData.push ["00523", "0515", "remap"].join(";")
+  if mouseGestures
+    sendData.push ["001", "", "mouseGestures"].join(";")
   if sendData.length > 0
     postNMH "SetKeyConfig", sendData.join("|")
   if customIcon = andy.local.config.customIcon
@@ -852,7 +855,7 @@ window.andy =
     chrome.storage.local.set saveData, =>
       @local = saveData
       defaultSleep = @local.config.defaultSleep
-      setConfigPlugin @local.keyConfigSet, @local.config.wheelSwitches
+      setConfigPlugin @local.keyConfigSet, @local.config
   updateCtxMenu: (id, ctxMenu, pause) ->
     ctxMenu.id = id
     if pause
@@ -1018,7 +1021,18 @@ scrapeHelp = (lang, sectInit, elTab) ->
     content = elem.cells[0].textContent.replace /^\s+|\s$/g, ""
     [elem.cells[1].getElementsByTagName("strong")...].forEach (strong) ->
       scKey = strong.textContent.toUpperCase().replace /\s/g, ""
-      scKey = scKey.replace("PGUP", "PAGEUP").replace("PGDOWN", "PAGEDOWN").replace(/DEL$/, "DELETE").replace(/INS$/, "INSERT").replace("ホーム", "HOME").replace("キー", "").replace("BAR", "")
+      scKey = scKey
+        .replace("PGUP", "PAGEUP")
+        .replace("PGDN", "PAGEDOWN")
+        .replace(/DEL$/, "DELETE")
+        .replace(/INS$/, "INSERT")
+        .replace("ホーム", "HOME")
+        .replace("キー", "")
+        .replace("BAR", "")
+        .replace("Left arrow", "ARROWLEFT")
+        .replace("Right arrow", "ARROWRIGHT")
+        .replace("左矢印", "ARROWLEFT")
+        .replace("右矢印", "ARROWRIGHT")
       unless scHelp[scKey]?[lang]
         unless scHelp[scKey]
           scHelp[scKey] = {}

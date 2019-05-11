@@ -61,7 +61,6 @@ var
     AlterModified(virtualModifires, virtualScanCode, KEYEVENTF_KEYUP);
   end;
 begin
-  Result:= False;
   GetKeyState(0);
   GetKeyboardState(KeyState);
   modifierFlags:= 0;
@@ -84,8 +83,7 @@ begin
       scriptMode:= True
     else begin
       keydownMode:= True;
-      if scanCode >= $200 then
-        Exit;
+      if scanCode >= $200 then Exit (False);
     end;
     modifierFlags2:= HiByte(LoWord(wPrm));
     scans:= IntToHex(modifierFlags2, 2) + IntToStr(scanCode);
@@ -100,7 +98,6 @@ begin
     end;
     scans:= IntToHex(modifierFlags, 2) + IntToStr(scanCode);
   end;
-  //Write2EventLog('FlexKbd', IntToHex(scanCode, 4) + ': ' + scans + ': ' + lastOrgModified + ': ' + IntToStr(keyDownState));
 
   KeyInputCount:= 0;
   SetLength(KeyInputs, 0);
@@ -115,7 +112,7 @@ begin
           Dec(modifierRelCount);
         end;
       end;
-      Exit;
+      Exit (False);
     end;
   end;
   // Exit2 --> Modifierキーが押されていない or Shiftのみ ＆ ファンクションキーじゃないとき
@@ -126,12 +123,12 @@ begin
     and not(scriptMode) and not(keydownMode) then
   begin
     // SingleKeyの処理 (Pending)
-    Exit;
+    Exit (False);
   end;
 
   if configMode and (keyDownState = 0) then begin
-    Result:= True;
     PostToChrome('configKeyEvent', scans);
+    Exit (True);
   end else begin
     if (scans = lastOrgModified) and (keyDownState = 0) then begin
       // リピート対応
@@ -150,11 +147,12 @@ begin
       if singleKeyFlag then begin
         ClearAll;
       end;
-      Exit;
+      Exit (False);
     end;
 
+    Result:= False;
     index:= keyConfigList.IndexOf(scans);
-    if (index > -1) or scriptMode or keydownMode then begin
+    if (index > -1) or (scriptMode) or (keydownMode) then begin
       Result:= True;
       if ((index = -1) and scriptMode) or keydownMode then begin
         keyConfig:= TKeyConfig.Create(
@@ -277,12 +275,14 @@ begin
             keyConfig.Free;
         end;
       end else if keyConfig.mode = 'through' then begin
-        Result:= False;
+        Exit (False);
       end else if (keyDownState = 0) and ((keyConfig.mode = 'bookmark') or (keyConfig.mode = 'command') or (keyConfig.mode = 'batch')) then begin
         PostToChrome(keyConfig.mode, scans);
       end;
-      if scancode = $15D then
-        Result:= False;
+      // Application key
+      if (scancode = $15D) then begin
+        Exit (False);
+      end;
     end;
   end;
 end;

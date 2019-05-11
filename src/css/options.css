@@ -632,6 +632,16 @@ i.icon-arrow-right {
   display: table;
   padding-left: 2px;
 }
+.popup .inputs > label > input {
+  margin-right: 4px;
+}
+.popup .descComment {
+  margin-left: 5px;
+  font-size: 0.8em;
+  background: #eee;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
 .popup .inputs input[type='text'] {
   margin-top: 0;
 }
@@ -919,8 +929,8 @@ i.icon-arrow-right {
 .ctxMenuOptions .inputs input.parentName {
   position: absolute;
   z-index: 2;
-  left: 6px;
-  top: 6px;
+  left: 10px;
+  top: 7px;
   width: 370px;
   border: none;
   box-shadow: none;

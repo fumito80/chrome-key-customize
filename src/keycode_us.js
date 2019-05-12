@@ -68,7 +68,7 @@ keys[0x41] = ["F7"];
 keys[0x42] = ["F8"];
 keys[0x43] = ["F9"];
 keys[0x44] = ["F10"];
-keys[0x45] = [""];
+keys[0x45] = ["Alt+SysRq"];
 keys[0x46] = ["ScrollLock"];
 keys[0x47] = ["10-7"];
 keys[0x48] = ["10-8"];
@@ -83,7 +83,7 @@ keys[0x50] = ["10-2"];
 keys[0x51] = ["10-3"];
 keys[0x52] = ["10-0"];
 keys[0x53] = ["10-."];
-keys[0x54] = ["Alt+SysRq"];
+// keys[0x54] = ["Alt+SysRq"];
 keys[0x57] = ["F11"];
 keys[0x58] = ["F12"];
 //keys[0x70] = ["カタカナ"];
@@ -96,7 +96,8 @@ keys[0x11D] = ["Right Ctrl"];
 keys[0x135] = ["10-/"];
 keys[0x137] = ["Print Screen"];
 keys[0x138] = ["Right Alt"];
-keys[0x146] = ["Pause"]; // +Alt = "Pause"
+keys[0x145] = ["NumLock"];
+keys[0x146] = ["Pause"]; // +Alt = Ctrl + Pause = Break?
 keys[0x147] = ["Home"];
 keys[0x148] = ["ArrowUp"];
 keys[0x149] = ["PageUp"];

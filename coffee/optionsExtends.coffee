@@ -303,6 +303,8 @@ commandsDisp =
   switchPrevWin:  ["win", "Switch to the previous window"]
   switchNextWin:  ["win", "Switch to the next window"]
   closeOtherWins: ["win", "Close other windows"]
+  historyGoBack:  ["tab", "Go back to the previous page from browsing history"]
+  historyForward: ["tab", "Go forward the next page from browsing history"]
   clearCache:     ["clr", "Clear browser's cache"]
   clearCookiesAll:["clr", "Clear browser's cookies and site data"]
   clearHistory:   ["clr", "Clear browsing history"]
@@ -408,7 +410,7 @@ class CommandOptionsView extends ExplorerBaseView
     if container.width
       @$(".content_outer").width(container.width).height(container.height)
     else
-      @$(".content_outer").width(700).height(200)
+      @$(".content_outer").width(750).height(300)
     @$(".command").html commandsDisp[@options.name][1]
     @$(".caption").val(@options.caption)
     commandOption = @$(".inputs").empty()

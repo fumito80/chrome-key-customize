@@ -74,65 +74,31 @@ begin
       Exit (False);
     end else begin
       keyConfig:= TKeyConfig(keyConfigList.Objects[index]);
-      if keyConfig.mode = 'remap' then begin
+      if (keyConfig.mode = 'disabled') then begin
+        Exit (False);
+      end else if (keyConfig.mode = 'remap') then begin
         KeyInputCount:= 0;
         SetLength(KeyInputs, 0);
         SetLength(newScans, 0);
-        modifiersBoth:= modifierFlags and keyConfig.modifierFlags;
         // CONTROL
-        if (modifiersBoth and FLAG_CONTROL) <> 0 then begin
-          ;
-        end else begin
-          if (keyConfig.modifierFlags and FLAG_CONTROL) <> 0 then begin
-            AddScan(SCAN_LCONTROL);
-          end
-          else if ((modifierFlags and FLAG_CONTROL) <> 0) then begin
-            ReleaseModifier(VK_RCONTROL, SCAN_RCONTROL, KEYEVENTF_EXTENDEDKEY);
-            ReleaseModifier(VK_LCONTROL, SCAN_LCONTROL, 0);
-          end;
+        if (keyConfig.modifierFlags and FLAG_CONTROL) <> 0 then begin
+          AddScan(SCAN_LCONTROL);
         end;
         // ALT
-        if (modifiersBoth and FLAG_MENU) <> 0 then begin
-          ;
-        end else begin
-          if (keyConfig.modifierFlags and FLAG_MENU) <> 0 then begin
-            AddScan(SCAN_LMENU);
-          end
-          else if ((modifierFlags and FLAG_MENU) <> 0) then begin
-            ReleaseModifier(VK_RMENU, SCAN_RMENU, KEYEVENTF_EXTENDEDKEY);
-            ReleaseModifier(VK_LMENU, SCAN_LMENU, 0);
-          end;
+        if (keyConfig.modifierFlags and FLAG_MENU) <> 0 then begin
+          AddScan(SCAN_LMENU);
         end;
         // SHIFT
-        if (modifiersBoth and FLAG_SHIFT) <> 0 then begin
-          ;
-        end else begin
-          if (keyConfig.modifierFlags and FLAG_SHIFT) <> 0 then begin
-            AddScan(SCAN_LSHIFT);
-          end
-          else if ((modifierFlags and FLAG_SHIFT) <> 0) then begin
-            ReleaseModifier(VK_RSHIFT, SCAN_RSHIFT, 0);
-            ReleaseModifier(VK_LSHIFT, SCAN_LSHIFT, 0);
-          end;
+        if (keyConfig.modifierFlags and FLAG_SHIFT) <> 0 then begin
+          AddScan(SCAN_LSHIFT);
         end;
         // WIN
-        if (modifiersBoth and FLAG_WIN) <> 0 then begin
-          ;
-        end else begin
-          if (keyConfig.modifierFlags and FLAG_WIN) <> 0 then begin
-            AddScan(SCAN_LWIN);
-          end
-          else if ((modifierFlags and FLAG_WIN) <> 0) then begin
-            ReleaseModifier(VK_RWIN, SCAN_RWIN, KEYEVENTF_EXTENDEDKEY);
-            ReleaseModifier(VK_LWIN, SCAN_LWIN, KEYEVENTF_EXTENDEDKEY);
-          end;
+        if (keyConfig.modifierFlags and FLAG_WIN) <> 0 then begin
+          AddScan(SCAN_LWIN);
         end;
-        //if keyDownState = 0 then
         AddScan(keyConfig.scanCode);
         MakeKeyInputs(newScans, 0);
         SendInput(KeyInputCount, @KeyInputs[0], SizeOf(KeyInputs[0]));
-      end else if (keyConfig.mode = 'through') then begin
-        Exit (False);
       end else begin
         PostToChrome(keyConfig.mode, scans);
       end;

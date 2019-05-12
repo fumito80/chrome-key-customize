@@ -755,6 +755,14 @@ execCommand = (keyEvent) ->
               index: tab.index
               url: tab.url
             dfd.resolve()
+        when "historyGoBack"
+          getActiveTab().done (tab) ->
+            chrome.tabs.goBack tab.id, ->
+              dfd.resolve()
+        when "historyForward"
+          getActiveTab().done (tab) ->
+            chrome.tabs.goForward tab.id, ->
+              dfd.resolve()
   dfd.promise()
 
 setConfigPlugin = (keyConfigSet, { wheelSwitches, mouseGestures }) ->

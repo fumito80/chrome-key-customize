@@ -179,6 +179,7 @@ begin
           if (mouseX > 0) then begin
             ScreenToClient(hWnd, pMHS^.pt);
             msgFlag:= getGestureDir(pMHS^.pt.x - mouseX, pMHS^.pt.y - mouseY);
+            mouseX:= 0;
             if (msgFlag > 0) then begin
               CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
               if (cancelFlag) then begin
@@ -186,7 +187,6 @@ begin
                 Exit (1);
               end;
             end;
-            mouseX:= 0;
           end;
         end;
       end;

@@ -437,6 +437,7 @@ class CommandOptionsView extends ExplorerBaseView
       @editer.setHistory history
     if @options.content
       @editer.focus()
+      @editer.setSelection { "line": 0, "ch": 0 }
     else
       @$(".caption").focus()
   onShowPopup: (name, model, @commandName) ->

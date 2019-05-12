@@ -37,22 +37,18 @@ header {
   top: 0;
   left: 0;
   padding: 2px 20px 2px 40px;
-  /* background: -webkit-gradient(linear, center bottom, center top, from(#000), to(#444)); */
-  background: -webkit-gradient(linear, center bottom, center top, from(#F6F6F6), to(#BDCFD2));
-  /* box-shadow: 0 0 7px #666; */
+  background: #444c52;
   z-index: 3;
 }
 header .h1 {
   font: 22px 'Subway Black', Arial;
-  line-height: 1.8em;
-  font-weight: normal;
-  color: #9CB1C7;
+  line-height: 2.2em;
+  color: #cd9521;
 }
 header .amp {
   padding: 0 0 0 7px;
 }
 header .title2 {
-  color: #9CB1C7;
   margin: 0;
   border-radius: 1px;
 }

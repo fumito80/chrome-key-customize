@@ -61,7 +61,7 @@ type
     hookKey, hookMouse, hookMouseWheel: HHOOK;
     keyPipeName, mousePipeName: array[0..255] of AnsiChar;
     hWnd: HWND;
-    mouseX, mouseY: Longint;
+    startX, startY: Longint;
     mouseWheelF, mouseGesturesF, inWheelTabArea: Boolean;
   end;
   pShareData = ^TShareData;

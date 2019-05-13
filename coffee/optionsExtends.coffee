@@ -303,6 +303,7 @@ commandsDisp =
   switchPrevWin:  ["win", "Switch to the previous window"]
   switchNextWin:  ["win", "Switch to the next window"]
   closeOtherWins: ["win", "Close other windows"]
+  discardTabs:    ["tab", "Discards unselected tabs from memory"]
   historyGoBack:  ["tab", "Go back to the previous page from browsing history"]
   historyForward: ["tab", "Go forward the next page from browsing history"]
   clearCache:     ["clr", "Clear browser's cache"]

@@ -159,7 +159,7 @@ begin
       pMHS:= PMouseHookStruct(lPrm);
       GetClassName(pMHS^.hwnd, buf, SizeOf(buf));
       if (wPrm = WM_MOUSEMOVE) and (mouseWheelF) and (AnsiStartsText(CHROME_CLASS_WIDGET, buf)) then begin
-        // on Mouse Wheel
+        // in mouse wheel area
         ScreenToClient(pMHS^.hwnd, pMHS^.pt);
         if (pMHS^.pt.y < 50) then begin
           inWheelTabArea:= True;
@@ -169,21 +169,21 @@ begin
       end else if ((wPrm = WM_RBUTTONDOWN) or (wPrm = WM_RBUTTONUP)) and (mouseGesturesF)
           and (AnsiStartsText(CHROME_CLASS_WIDGET, buf) or AnsiStartsText(CHROME_CLASS_RENDER, buf)) then begin
         if (wPrm = WM_RBUTTONDOWN) then begin
-          // on Mouse right-click button down
+          // on mouse right-click button down
           hWnd:= pMHS^.hwnd;
           ScreenToClient(hWnd, pMHS^.pt);
-          mouseX:= pMHS^.pt.x;
-          mouseY:= pMHS^.pt.y;
+          startX:= pMHS^.pt.x;
+          startY:= pMHS^.pt.y;
         end else if (wPrm = WM_RBUTTONUP) then begin
-          // on Mouse right-click button up
-          if (mouseX > 0) then begin
+          // on mouse right-click button up
+          if (startX > 0) then begin
             ScreenToClient(hWnd, pMHS^.pt);
-            msgFlag:= getGestureDir(pMHS^.pt.x - mouseX, pMHS^.pt.y - mouseY);
-            mouseX:= 0;
+            msgFlag:= getGestureDir(pMHS^.pt.x - startX, pMHS^.pt.y - startY);
+            startX:= 0;
             if (msgFlag > 0) then begin
               CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
               if (cancelFlag) then begin
-                PMsg(lPrm)^.message:= WM_NULL;
+                mouse_event(MOUSEEVENTF_LEFTUP or MOUSEEVENTF_ABSOLUTE, 0, 0, 0, 0);
                 Exit (1);
               end;
             end;

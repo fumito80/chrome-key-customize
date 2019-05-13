@@ -291,17 +291,10 @@ getActiveTab = ->
         dfd.reject()
   dfd.promise()
 
-getWindowTabs = (options) ->
+getAllTabs = (options = {}) ->
   dfd = $.Deferred()
-  options.currentWindow = true
   chrome.tabs.query options, (tabs) ->
     dfd.resolve tabs
-  dfd.promise()
-
-getAllTabs = ->
-  dfd = $.Deferred()
-  chrome.tabs.query {}, (tabs) ->
-    dfd.resolve(tabs)
   dfd.promise()
 
 # オプションページ表示時切り替え
@@ -548,16 +541,18 @@ closeWindow = (dfd, windows, index) ->
   else
     dfd.resolve()
 
-closeTabs = (dfd, fnWhere) ->
-  getWindowTabs({ active: false, currentWindow: true, windowType: "normal" }, fnWhere)
-    .done (tabs) ->
-      tabIds = []
-      tabs.forEach (tab) ->
-        tabIds.push tab.id if fnWhere(tab)
-      if tabIds.length > 0
-        chrome.tabs.remove tabIds, -> dfd.resolve()
-      else
-        dfd.resolve()
+closeTabs = (dfd, fnCondition) ->
+  getAllTabs
+    active: false
+    currentWindow: true
+    windowType: "normal"
+    currentWindow: true
+  .done (tabs) ->
+    tabIds = tabs.filter(fnCondition).map (tab) -> tab.id
+    if tabIds.length > 0
+      chrome.tabs.remove tabIds, -> dfd.resolve()
+    else
+      dfd.resolve()
 
 execJS = (dfd, tabId, code, allFrames) ->
   chrome.tabs.executeScript tabId,
@@ -763,6 +758,13 @@ execCommand = (keyEvent) ->
           getActiveTab().done (tab) ->
             chrome.tabs.goForward tab.id, ->
               dfd.resolve()
+        when "discardTabs"
+          getAllTabs().done (tabs) ->
+            tabs
+              .filter (tab) -> not tab.highlighted and not tab.discarded
+              .map (tab) -> tab.id
+              .forEach (id) -> chrome.tabs.discard id
+            dfd.resolve()
   dfd.promise()
 
 setConfigPlugin = (keyConfigSet, { wheelSwitches, mouseGestures }) ->

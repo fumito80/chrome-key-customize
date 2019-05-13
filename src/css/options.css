@@ -41,16 +41,16 @@ header {
   z-index: 3;
 }
 header .h1 {
-  font: 22px 'Subway Black', Arial;
-  line-height: 2.2em;
-  color: #cd9521;
+  line-height: 1.0em;
 }
-header .amp {
-  padding: 0 0 0 7px;
+header .title1 {
+  font-size: 0.5em;
+  color: #bfc3c5;
 }
 header .title2 {
-  margin: 0;
-  border-radius: 1px;
+  font: 22px 'Subway Black', Arial;
+  color: #cd9521;
+  margin-left: 1px;
 }
 header .h1 div {
   line-height: 1.0em;

@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="flexkbd64_dll"/>
+      <Title Value="Chrome backroom dll"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -21,7 +21,6 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
-      <RevisionNr Value="1"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -44,6 +43,7 @@
       <Unit0>
         <Filename Value="flexkbd64_dll.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="backroom"/>
       </Unit0>
       <Unit1>
         <Filename Value="Common.pas"/>
@@ -76,9 +76,6 @@
     </CodeGeneration>
     <Linking>
       <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>

@@ -5,10 +5,10 @@
   src: local('Subway Black'), url('fonts/Subway-Black.woff') format('woff');
 }
 @font-face {
-  font-family: 'Subway Shadow';
+  font-family: 'Noto Suns';
   font-style: normal;
   font-weight: normal;
-  src: local('Subway Shadow'), url('fonts/Subway-Shadow.woff') format('woff');
+  src: local('Noto Suns'), url('fonts/NotoSans-Regular.ttf') format('ttf');
 }
 body {
   padding: 0 4px 0 20px;

@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="flexkbd64"/>
+      <Title Value="Chrome backroom"/>
       <UseAppBundle Value="False"/>
     </General>
     <i18n>
@@ -57,7 +57,6 @@
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
-      <TargetProcessor Value="ATHLON64"/>
       <TargetCPU Value="x86_64"/>
       <TargetOS Value="win64"/>
       <Optimizations>

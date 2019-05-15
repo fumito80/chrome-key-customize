@@ -1,4 +1,4 @@
-library flexkbd64_dll;
+library backroom;
 
 {.$MODE Delphi}
 

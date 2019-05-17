@@ -358,12 +358,12 @@ chrome.tabs.onUpdated.addListener (tabId, changeInfo, tab) ->
 execBatchMode = (scCode) ->
   #console.log scCode
   gCurrentTabId = null
+  keyConfigs = andy.local.keyConfigSet.filter (item) -> item.new is scCode || item.parentId is scCode
   cbDone = (dfd, sleepMSec, batchIndex) ->
     #postNMH "Sleep", sleepMSec if sleepMSec > 0
     setTimeout((->
       dfd.resolve(batchIndex + 1)
     ), sleepMSec)
-  keyConfigs = andy.local.keyConfigSet.filter (item) -> item.new is scCode || item.parentId is scCode
   # execute
   (dfdBatchQueue = dfdKicker = $.Deferred()).promise()
   dfdBatchQueue = dfdBatchQueue.then ->
@@ -384,7 +384,12 @@ execBatchMode = (scCode) ->
         keyConfig = keyConfigs[batchIndex]
         switch keyConfig.mode
           when "remap"
-            execShortcut dfd, cbDone, null, keyConfig.origin, defaultSleep, "keydown", batchIndex
+            if keyConfig.new.startsWith("00") and keyConfig.new is keyConfig.origin
+              setTimeout((->
+                cbDone dfd, 0, batchIndex
+              ), 0)
+            else
+              execShortcut dfd, cbDone, null, keyConfig.origin, defaultSleep, "keydown", batchIndex
           when "command"
             execCommand(keyConfig.new).done (results) ->
               if results?.length > 0

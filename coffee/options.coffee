@@ -88,7 +88,8 @@ HeaderView = Backbone.View.extend
     @model.on "change:lang", @onChangeLang, @
   # DOM Events
   onClickMenu: (event) ->
-    if (mainMenu = @$(".main-menu")).hasClass("blurNow")
+    mainMenu = @$(".main-menu")
+    if mainMenu.hasClass("blurNow")
       mainMenu.removeClass "blurNow"
       return
     mainMenu.toggleClass("selecting").focus()
@@ -149,8 +150,8 @@ KeyConfigView = Backbone.View.extend
     "focus .new,.origin"   : "onFocusKeyInput"
     "focus .inputSleep"    : "onClickInputMemo"
     "keydown"              : "onKeydown"
-    "submit  .memo"        : "onSubmitMemo"
-    "submit  .formSleep"   : "onSubmitSleep"
+    "submit .memo"         : "onSubmitMemo"
+    "submit .formSleep"    : "onSubmitSleep"
     "blur  .selectMode"    : "onBlurSelectMode"
     "blur  .selectCog"     : "onBlurSelectCog"
     "blur  input.memo"     : "onBlurInputMemo"
@@ -381,18 +382,11 @@ KeyConfigView = Backbone.View.extend
     false
 
   onClickMode: (event) ->
-    if event.currentTarget.getAttribute("title") is "Suspend"
-      return
-    if (selectMode = @$(".selectMode")).hasClass("blurNow")
-      selectMode.removeClass "blurNow"
-      return
-    selectMode.toggleClass("selecting").focus()
+    @$(".selectMode").toggleClass("selecting").focus()
     event.stopPropagation()
 
   onBlurSelectMode: (event) ->
-    (selectMode = @$(".selectMode").removeClass("selecting"))
-    if event.relatedTarget
-      selectMode.addClass("blurNow")
+    setTimeout (=> @$(".selectMode").removeClass("selecting")), 0
 
   onChangeMode: (event, mode) ->
     if event
@@ -422,16 +416,11 @@ KeyConfigView = Backbone.View.extend
     @onSubmitMemo()
 
   onClickCog: (event) ->
-    if (selectCog = @$(".selectCog")).hasClass("blurNow")
-      selectCog.removeClass "blurNow"
-      return
-    selectCog.toggleClass("selecting").focus()
+    @$(".selectCog").toggleClass("selecting").focus()
     event.stopPropagation()
 
   onBlurSelectCog: (event) ->
-    (selectCog = @$(".selectCog").removeClass("selecting"))
-    if event.relatedTarget
-      selectCog.addClass("blurNow")
+    setTimeout (=> @$(".selectCog").removeClass("selecting")), 0
 
   onClickEdit: (event) ->
     if (mode = @model.get "mode") is "through"
@@ -618,29 +607,14 @@ KeyConfigView = Backbone.View.extend
       .addClass mode
     if /remap/.test mode
       @$("th:eq(1) > *, th:eq(2) > *").show()
-      # @$("th:first,th:eq(1)").removeAttr("colspan").css("padding", "").find("i").show()
-      # @$("th:eq(1),th:eq(2),th .origin").show().find("i").show()
     else
       @$("th:eq(1) > *, th:eq(2) > *").hide()
-      # if @$el.hasClass "child"
-      #   @$("th:first").css("padding", "16px 0").find("i").hide()
-      #   @$("th .origin").hide()
-      # else if @$el.hasClass "parent"
-      #   @$("th:first").removeAttr("colspan")
-      #   @$("th:eq(1),th:eq(2)").show()
-      #   @$("th:eq(1)").css("padding", "18px 0").find("i").hide()
-      #   @$("th .origin").hide()
-      # else
-      #   @$("th:first").attr("colspan", "3")
-      #   @$("th:eq(1),th:eq(2)").hide()
 
   setKbdValue: (input$, value) ->
     if value is "00768"
       input$.html """<span title="Toolbar Button"><img src="images/toolbarIcon.png" class="toolbarIcon"></span>"""
-      true
     else if result = decodeKbdEvent value
       input$.html _.map(result.split(" + "), (s) -> "<span>#{s}</span>").join("+")
-      true
     else
       false
 
@@ -663,54 +637,56 @@ KeyConfigView = Backbone.View.extend
           title: bookmark.title
         editOption = iconName: "icon-pencil", command: "Edit bookmark..."
       when "command"
-        desc = (commandDisp = commandsDisp[commandName = (command = @model.get("command")).name])[1]
+        { name, content, caption } = @model.get("command")
+        desc = (commandDisp = commandsDisp[name])[1]
         if commandDisp[2]
           content3row = []
-          #command = @model.get("command")
-          lines = command.content?.split("\n") || []
+          lines = content?.split("\n") || []
           for i in [0...lines.length]
             if i > 2
               content3row[i-1] += " ..."
               break
             else
               content3row.push lines[i].replace(/"/g, "'")
-          tdDesc.append @tmplCommandCustom
+          tdDesc.append @tmplCommandCustom {
             ctg: commandDisp[3]
-            desc: desc
+            desc
             content3row: content3row.join("\n")
-            caption: command.caption
+            caption
+          }
           editOption = iconName: "icon-pencil", command: "Edit command..."
-        else if commandName is "zoomFixed"
+        else if name is "zoomFixed"
           unless zoom = @model.get("sleep")
             @model.set "sleep", zoom = 100
-          tdDesc.append @tmplZoomFixed
-            zoom: zoom
-        else if commandName is "zoomInc"
+          tdDesc.append @tmplZoomFixed { zoom }
+        else if name is "zoomInc"
           unless zoom = @model.get("sleep")
             @model.set "sleep", zoom = 10
-          tdDesc.append @tmplZoomInc
-            zoom: zoom
+          tdDesc.append @tmplZoomInc { zoom }
         else
-          tdDesc.append @tmplCommand desc: desc, ctg: commandDisp[0].substring(0,1).toUpperCase() + commandDisp[0].substring(1)
+          ctg = commandDisp[0].substring(0,1).toUpperCase() + commandDisp[0].substring(1)
+          tdDesc.append @tmplCommand { desc, ctg }
+            
       when "remap", "disabled"
         if mode is "remap"
           keycombo = @$(".origin").text()
         else
           keycombo = @$(".new").text()
         keycombo = (keycombo.replace /\s/g, "").toUpperCase()
-        unless help = scHelp[keycombo]
+        unless help = scHelp[@lang][keycombo]
           if /^CTRL\+[2-7]$/.test keycombo
-            help = scHelp["CTRL+1"]
-        if help　&& help[@lang]
-          for i in [0...help[@lang].length]
-            test = help[@lang][i].match /(^\w+)\^(.+)/
-            key = RegExp.$1
-            content = RegExp.$2
-            tdDesc.append(@tmplHelp
-                sectDesc: scHelpSect[key]
-                sectKey:  key
-                scHelp:   content
-              ).find(".sectInit").tooltip position: {my: "left+10 top-60"}, tooltipClass: "tooltipClass"
+            help = scHelp[@lang]["CTRL+1"]
+        if help
+          help.forEach (scKey) =>
+            [, key, content] = /(^\w+)\^(.+)/.exec scKey
+            tdDesc.append @tmplHelp
+              sectDesc: scHelpSect[@lang][key]
+              sectKey:  key
+              scHelp:   content
+            # .find(".sectInit")
+            # .tooltip
+            #   position: { my: "left+10 top-60" }
+            #   tooltipClass: "tooltipClass"
     if tdDesc.html() is ""
       tdDesc.append @tmplMemo memo: @model.get("memo")
       editOption = iconName: "icon-pencil", command: "Edit description"
@@ -1263,9 +1239,7 @@ andy = chrome.extension.getBackgroundPage().andy
 
 $ = jQuery
 $ ->
-  keyCodes = andy.getKeyCodes()
-  scHelp   = andy.getScHelp()
-  scHelpSect = andy.getScHelpSect()
+  [keyCodes, scHelp, scHelpSect] = andy.getConfig()
   saveData = andy.local
 
   config = new Config saveData.config

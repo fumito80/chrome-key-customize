@@ -128,14 +128,12 @@ getScanCode = (keyName) ->
   { keys } = andy.getKeyCodes()[kbdtype]
   keys.findIndex (key) -> keyName is key?[0] || keyName is key?[1]
 
-modifierInits = ["c", "a", "s", "w"]
-
 execShortcut = (dfd, cbDone, transCode, scCode, sleepMSec, execMode, batchIndex) ->
   if transCode
     [test, modifiers, keyIdentifier] = transCode.exec(/\[(\w*?)\](.+)/) || [false]
     if (test)
       modifiersCode = modifiers.toLowerCase().split("").reduce (acc, c) ->
-        acc + Math.pow(2, modifierInits.indexOf(c))
+        acc + Math.pow(2, ["c", "a", "s", "w"].indexOf(c))
       , 0
     else
       modifiersCode = 0
@@ -889,10 +887,8 @@ window.andy =
     JP:
       keys: keysJP
       name: "JP 109 Keyboard"
-  getScHelp: ->
-    scHelp
-  getScHelpSect: ->
-    scHelpSect
+  getConfig: ->
+    [@getKeyCodes(), scHelp, scHelpSect] 
   startEdit: ->
     postNMH "EndConfigMode"
     return
@@ -1022,74 +1018,13 @@ createCtxMenus = () ->
         registerCtxMenu dfdMain, ctxMenus, 0
     dfdMain.promise()
 
-scHelp = {}
-scHelpSect = {}
-
-scrapeHelp = (lang, sectInit, elTab) ->
-  targets = $(elTab).find "tr:has(td:first-child:not(:has(strong)))"
-  targets.each (i, elem) ->
-    content = elem.cells[0].textContent.replace /^\s+|\s$/g, ""
-    [elem.cells[1].getElementsByTagName("strong")...].forEach (strong) ->
-      scKey = strong.textContent.toUpperCase().replace /\s/g, ""
-      scKey = scKey
-        .replace("PGUP", "PAGEUP")
-        .replace("PGDN", "PAGEDOWN")
-        .replace(/DEL$/, "DELETE")
-        .replace(/INS$/, "INSERT")
-        .replace("ホーム", "HOME")
-        .replace("キー", "")
-        .replace("BAR", "")
-        .replace("Left arrow", "ARROWLEFT")
-        .replace("Right arrow", "ARROWRIGHT")
-        .replace("左矢印", "ARROWLEFT")
-        .replace("右矢印", "ARROWRIGHT")
-      unless scHelp[scKey]?[lang]
-        unless scHelp[scKey]
-          scHelp[scKey] = {}
-        scHelp[scKey][lang] = []
-      scHelp[scKey][lang].push sectInit + "^" + content
-
-analyzeScHelpPage = (text, lang) ->
-  doc = $ text
-  mainSection = doc.find("div.cc")
-  sectOS = null
-  [mainSection[0].children...].forEach (el) ->
-    sectInit = null
-    if el.tagName is "H2"
-      sectOS = el.textContent
-    if /^Windows.+Linux$/.test(sectOS) and el.className is "zippy"
-      switch el.textContent
-        when "Tab and window shortcuts", "タブとウィンドウのショートカット"
-          sectInit = "T"
-        when "Google Chrome feature shortcuts", "Google Chrome 機能のショートカット"
-          sectInit = "C"
-        when "Address bar shortcuts", "アドレスバーのショートカット"
-          sectInit = "A"
-        when "Webpage shortcuts", "ウェブページのショートカット"
-          sectInit = "W"
-        when "Text shortcuts", "テキストのショートカット"
-          sectInit = "Tx"
-      if sectInit
-        scHelpSect[sectInit] = el.textContent
-        scrapeHelp lang, sectInit, content = $(el).next().find(".nice-table")
-
-getHelp = (lang) ->
-  dfd = $.Deferred()
-  url = chrome.runtime.getURL "help_#{lang}.html"
-  fetch(url)
-    .then (response) -> response.text()
-    .then (text) ->
-      analyzeScHelpPage text, lang
-      dfd.resolve()
-  dfd.promise()
-
 checkDllVer = ->
   chrome.runtime.sendNativeMessage nmhNameAndArch, "command": "GetVersion", (resp) ->
     # console.log andy.local.config?.version
     if resp and verLocal = andy.local.config?.version
-      versLocal = verLocal.split(".")
-      versDll = resp.value.split(".")
-      unless versLocal[0] is versDll[0] and versLocal[1] is versDll[1]
+      [, verLocal] = /^(\d+\.\d+)\.?/.exec verLocal
+      [, verDll] = /^(\d+\.\d+)\.?/.exec resp.value
+      unless verLocal is verDll
         resp = null
     if !resp
       chrome.tabs.create url: "installview.html"
@@ -1103,30 +1038,87 @@ startNMH = ->
     if win?.width
       postNMH "StartApp", chrome.runtime.id
 
+scrapeHelpScKey = (sectInit, elTab) ->
+  targets = $(elTab).find "tr:has(td:first-child:not(:has(strong)))"
+  [targets...].reduce (acc, elem) ->
+    [elContent, elSckey] = elem.cells
+    content = elContent.textContent.replace /^\s+|\s$/g, ""
+    [elSckey.getElementsByTagName("strong")...].forEach (strong) ->
+      scKey = strong.textContent.toUpperCase().replace /\s/g, ""
+      scKey = scKey
+        .replace("PGUP", "PAGEUP")
+        .replace("PGDN", "PAGEDOWN")
+        .replace(/DEL$/, "DELETE")
+        .replace(/INS$/, "INSERT")
+        .replace("ホーム", "HOME")
+        .replace("キー", "")
+        .replace("BAR", "")
+        .replace("LEFTARROW", "ARROWLEFT")
+        .replace("RIGHTARROW", "ARROWRIGHT")
+        .replace("左矢印", "ARROWLEFT")
+        .replace("右矢印", "ARROWRIGHT")
+      unless acc[scKey]?
+        acc[scKey] = []
+      acc[scKey].push sectInit + "^" + content
+    acc
+  , {}
+
+scrapeHelpSection = (text) ->
+  doc = $ text
+  [mainSection] = doc.find("div.cc")
+  [mainSection.children...].reduce ([accOS, accHelp, accHelpSect], el) ->
+    os = if el.tagName is "H2" then el.textContent else accOS
+    if /^Windows.+Linux$/.test(os) and el.className is "zippy"
+      sectInit = switch el.textContent
+        when "Tab and window shortcuts", "タブとウィンドウのショートカット"
+          "T"
+        when "Google Chrome feature shortcuts", "Google Chrome 機能のショートカット"
+          "C"
+        when "Address bar shortcuts", "アドレスバーのショートカット"
+          "A"
+        when "Webpage shortcuts", "ウェブページのショートカット"
+          "W"
+        when "Text shortcuts", "テキストのショートカット"
+          "Tx"
+      if sectInit
+        niceTable = $(el).next().find(".nice-table")
+        return [
+          os
+          Object.assign {}, accHelp, scrapeHelpScKey(sectInit, niceTable)
+          Object.assign {}, accHelpSect, { [sectInit]: el.textContent }
+        ]
+    [os, accHelp, accHelpSect]
+  , [null, {}, {}]
+
+scrapeHelp = (lang) ->
+  dfd = $.Deferred()
+  url = chrome.runtime.getURL "help_#{lang}.html"
+  fetch(url)
+    .then (response) -> response.text()
+    .then (text) ->
+      [, scHelpLang, scHelpSectLang] = scrapeHelpSection text
+      dfd.resolve([scHelpLang, scHelpSectLang])
+  dfd.promise()
+
+langs = ["ja", "en"]
+scHelp = {}
+scHelpSect = {}
+
 $ ->
   andy.setLocal().done ->
     startNMH()
     chrome.windows.onCreated.addListener ->
       startNMH()
 
-  getHelp("ja").done ->
-    getHelp("en").done ->
-      delete scHelp["-"]
-      delete scHelp["+"]
-      scHelp["CTRL+;"] = ja: ["W^ページ全体を拡大表示します。"]
-      scHelp["CTRL+="] = en: ["W^Enlarges everything on the page."]
-      scHelp["CTRL+-"] =
-        en: ["W^Makes everything on the page smaller."]
-        ja: ["W^ページ全体を縮小表示します。"]
-      scHelp["ALT+LEFT"] =
-        en: ["W^Goes to the previous page in your browsing history for the tab."]
-        ja: ["W^そのタブの閲覧履歴の前のページを表示します。"]
-      scHelp["ALT+RIGHT"] =
-        en: ["W^Goes to the next page in your browsing history for the tab."]
-        ja: ["W^そのタブの閲覧履歴の次のページを表示します。"]
-      scHelp["CTRL+LEFT"] =
-        en: ["W^Moves your cursor to the preceding key term in the address bar."]
-        ja: ["W^アドレスバー内の前の単語にカーソルを移動します。"]
-      scHelp["CTRL+RIGHT"] =
-        en: ["W^Moves your cursor to the next key term in the address bar."]
-        ja: ["W^アドレスバー内の次の単語にカーソルを移動します。"]
+  langs.forEach (lang) ->
+    scrapeHelp(lang).done ([scHelpAny, scHelpSectAny]) ->
+      delete scHelpAny["+"]
+      switch lang
+        when "ja"
+          scHelpAny["CTRL+;"] = ["W^ページ全体を拡大表示します。"]
+          scHelpAny["CTRL+-"] = ["W^ページ全体を縮小表示します。"]
+        when "en"
+          scHelpAny["CTRL+="] = ["W^Enlarges everything on the page."]
+          scHelpAny["CTRL+-"] = ["W^Makes everything on the page smaller."]
+      scHelp[lang] = scHelpAny
+      scHelpSect[lang] = scHelpSectAny

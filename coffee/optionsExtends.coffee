@@ -6,6 +6,9 @@ router = null
 keyConfigSetView = null
 ctxMenuManagerView = null
 
+F =
+  range: (from, to) -> [Array(to - from + 1)...].map((_, i) => i + from)
+
 PopupBaseView = Backbone.View.extend
   initialize: (options) ->
     router.on "showPopup", @onShowPopup, @
@@ -304,8 +307,8 @@ commandsDisp =
   switchNextWin:  ["win", "Switch to the next window"]
   closeOtherWins: ["win", "Close other windows"]
   discardTabs:    ["tab", "Discards unselected tabs from memory"]
-  historyGoBack:  ["tab", "Go back to the previous page from browsing history"]
-  historyForward: ["tab", "Go forward the next page from browsing history"]
+  # historyGoBack:  ["tab", "Go back to the previous page from browsing history"]
+  # historyForward: ["tab", "Go forward the next page from browsing history"]
   clearCache:     ["clr", "Clear browser's cache"]
   clearCookiesAll:["clr", "Clear browser's cookies and site data"]
   clearHistory:   ["clr", "Clear browsing history"]
@@ -387,19 +390,49 @@ class CommandOptionsView extends ExplorerBaseView
       tabSize: 4
       indentUnit: 4
       indentWithTabs: true
-      #electricChars: true
+      electricChars: true
       lineNumbers: true
       firstLineNumber: 1
       gutter: false
       fixedGutter: false
       matchBrackets: true
     $(".CodeMirror-scroll").addClass "result_outer"
-    @editer.on "change", =>
-      @onStopDrag()
+    @editer.on "change", => @onStopDrag()
+    @editer.on "keydown", (cm, { key, ctrlKey, shiftKey }) =>
+      unless cm.doc.mode.name in ["coffeescript", "javascript"] and not cm.options.readOnly
+        return
+      if ctrlKey and key is "/"
+        lineComment = cm.doc.mode.lineComment
+        [reLineComment, reReplaceComment] = if cm.doc.mode.name is "coffeescript"
+          [/^\s*#/, /#\s?/]
+        else #javascript
+          [/^\s*\/\//, /\/\/\s?/]
+        selFrom = cm.doc.sel.from.line
+        selTo = cm.doc.sel.to.line - if selFrom isnt cm.doc.sel.to.line and cm.doc.sel.to.ch is 0 then 1 else 0
+        [commented, minIndent] = F.range(selFrom, selTo).reduce ([commented, minIndent], i) ->
+          line = cm.doc.children[0].lines[i].text
+          if /^\s*$/.test line
+            return [commented, minIndent]
+          [, headSpc] = /^(\s*)/.exec(line) || [, ""]
+          [
+            if reLineComment.test(line) then commented else false
+            Math.min(headSpc.length, minIndent)
+          ]
+        , [true, 9999999]
+        for i in [selFrom..selTo]
+          line = cm.doc.children[0].lines[i].text
+          if /^\s*$/.test line
+            continue
+          newLine = if commented
+            line.replace(reReplaceComment, "") + "\n"
+          else
+            line.slice(0, minIndent) + lineComment + " " + line.slice(minIndent) + "\n"
+          cm.doc.replaceRange(newLine, { line: i, ch: 0 }, { line: i + 1, ch: 0 })
+          cm.doc.setSelection { "line": selTo, "ch": 0 }
     @editer.lineAtHeight 18
     @setNiceScroll()
     @$(".content_outer").resizable
-      minWidth: 750
+      minWidth: 760
       minHeight: 100
       start: @hideNiceScroll.bind(@)
       stop: @showNiceScroll.bind(@)
@@ -411,7 +444,7 @@ class CommandOptionsView extends ExplorerBaseView
     if container.width
       @$(".content_outer").width(container.width).height(container.height)
     else
-      @$(".content_outer").width(750).height(300)
+      @$(".content_outer").width(760).height(300)
     @$(".command").html commandsDisp[@options.name][1]
     @$(".caption").val(@options.caption)
     commandOption = @$(".inputs").empty()

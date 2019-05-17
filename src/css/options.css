@@ -75,16 +75,20 @@ footer.scrolling {
   display: none;
   position: absolute;
   z-index: 4;
-  top: 100%;
+  top: calc(100% - 4px);
   left: auto;
-  right: 30px;
-  padding: .5rem 0;
-  margin: .125rem 0 0;
-  font-size: 1rem;
+  right: 28px;
+  padding: .2rem 0;
   color: #212529;
   background: #fff;
   border: 1px solid rgba(0,0,0,.15);
   border-radius: .25rem;
+}
+.main-menu .dropdown-item {
+  padding: .25rem 1.0rem;
+}
+.main-menu .dropdown-item:hover {
+  background-color: rgb(232, 234, 237);
 }
 .main-menu.selecting {
   display: inline-block;
@@ -134,8 +138,9 @@ footer.scrolling {
 }
 .tooltipClass {
   background-color: Ivory;
-  border: 7px solid rgb(122, 122, 160);
+  border: 2px solid rgb(122, 122, 160) !important;
   border-radius: 5px;
+  box-shadow: none; 
 }
 .menu-settings, .addKeyConfig {
   margin: 5px;
@@ -297,7 +302,7 @@ div.addnew:focus {
   color: #666666;
 }
 .selectMode div:hover, .selectCog div:hover {
-  background: #E3F2FF;
+  background: rgb(232, 234, 237);
 }
 .selectMode div:hover .icon {
   color: #000000;
@@ -359,9 +364,11 @@ i.icon-arrow-right {
 .keyConfigSetView tbody td, .keyConfigSetView tbody th {
   border: 0;
 }
-.keyConfigSetView div.borderRow {
-  border-top: 1px dotted #cccccc;
+.keyConfigSetView .borderRow > td  {
   padding: 0;
+}
+.keyConfigSetView .borderRow > td > div  {
+  border-top: 1px dotted #cccccc;
 }
 .keyConfigSetView tbody .thRemap {
   white-space: nowrap;

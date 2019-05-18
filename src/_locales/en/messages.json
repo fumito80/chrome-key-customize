@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "Chrome Shortcutware"
+    "message": "Chrome backroom"
   },
   "appDesc": {
-    "message": "You can remap keyboard shortcuts freely. (It works only on Windows platform)"
+    "message": "You can remap keyboard shortcuts freely. (It works only on Windows-64bit platform)"
   }
 }

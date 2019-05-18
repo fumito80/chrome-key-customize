@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "Chrome Shortcutware"
+    "message": "Chrome backroom"
   },
   "appDesc": {
-    "message": "Chromeのショートカットキーを自由にカスタマイズできます。（Windows版専用）"
+    "message": "Chromeのショートカットキーを自由にカスタマイズできます。（Windows-64bit版Chrome専用）"
   }
 }

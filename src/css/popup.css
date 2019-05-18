@@ -373,7 +373,6 @@ i.icon-arrow-right {
   padding: 0 10px;
   cursor: default;
   white-space: nowrap;
-  overflow: hidden;
 }
 .keyConfigSetView tbody .desc > * {
   float: left;
@@ -512,6 +511,7 @@ i.icon-arrow-right {
 .keyConfigSetView .blank {
   background: #F6F6F6;
   padding: 0 12px;
+  position: relative;
 }
 .keyConfigSetView .ui-placeholder {
   border: 1px solid #FF1E93;

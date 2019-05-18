@@ -1,29 +1,634 @@
-@charset "utf-8";
-/* CSS Document */
-
+@font-face {
+  font-family: 'Subway Black';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Subway Black'), url('fonts/Subway-Black.woff') format('woff');
+}
+@font-face {
+  font-family: 'Noto Suns';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Noto Suns'), url('fonts/NotoSans-Regular.ttf') format('ttf');
+}
+html {
+  overflow: hidden;
+}
 body {
-  min-width: 250px;
+  width: 750px;
+  height: 500px;
+  margin: 0 0 0 12px;
+  font-family: 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
+  font-size: 0.9em;
+  overflow: hidden;
+  background-color: #F6F6F6;
 }
-td.task {
+input[type="text"], input[type="number"], select, textarea {
+  outline: 0;
+  border-radius: 1px;
+  box-shadow: none;
+}
+select:focus, input[type="number"]:focus, textarea:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+label {
+  margin-bottom: 0;
+}
+header {
+  position: fixed;
   width: 100%;
-  padding-left: 0px;
+  top: 0;
+  left: 0;
+  padding: 2px 20px 2px 20px;
+  background: #444c52;
+  z-index: 3;
 }
-div.name {
-  font-family: Arial,sans-serif;
-  font-size: 10pt;
+header .h1 {
+  line-height: 1.0em;
+  font-size: 1.6em;
+}
+header .title1 {
+  font-size: 0.7em;
+  color: #bfc3c5;
+}
+header .title2 {
+  font: 19px 'Subway Black', Arial;
+  color: #cd9521;
+  margin-left: 1px;
+}
+header .h1 div {
+  line-height: 1.0em;
+}
+header .menu-settings {
+  margin: 0;
+}
+header .menu-settings .btn-sm {
+    padding: 0 5px;
+}
+footer {
+  height: 10px;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: none;
+}
+footer.scrolling {
+  box-shadow: 0 -7px 4px -4px #666 inset;
+}
+.main-menu {
+  display: none;
+  position: absolute;
+  z-index: 4;
+  top: calc(100% - 4px);
+  left: auto;
+  right: 28px;
+  padding: .2rem 0;
+  color: #212529;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: .25rem;
+}
+.main-menu .dropdown-item {
+  padding: .25rem 1.0rem;
+}
+/* .main-menu .dropdown-item:hover {
+  background-color: rgb(232, 234, 237);
+} */
+.main-menu.selecting {
+  display: inline-block;
+}
+.main-menu > a {
+  cursor: default;
+}
+.scrollEnd {
+  position: absolute;
+  top: 8px;
+  font-size: 24px;
+  z-index: 3;
+  display: none;
+}
+.scrollEnd.top {
+  right: 32px;
+}
+.scrollEnd.bottom {
+  right: 7px;
+}
+.scrollEnd i {
+  cursor: pointer;
+  color: #999;
+}
+.scrollEnd i:hover {
+  color: #000;
+}
+#tiptip_holder {
+  z-index: 9;
+}
+.tooltipClass {
+  background-color: Ivory;
+  border: 2px solid rgb(122, 122, 160) !important;
+  border-radius: 5px;
+  box-shadow: none; 
+}
+.menu-settings, .addKeyConfig {
+  margin: 5px;
+  margin-right: 10px;
+  float: right;
+  display: none;
+}
+.keyConfigSetView {
+  padding-bottom: 30px;
+}
+.fixed-table-container {
+  position: relative;
+  padding-top: 30px;
+  margin-top: 30px;
+}
+.header-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 28px;
+  border-bottom: 1px solid #BBBBBB;
+  height: 30px;
+  z-index: 2;
+  box-shadow: none;
+}
+.header-background.scrolling {
+  box-shadow: 0 6px 4px -4px #999;
+}
+.fixed-table-container-inner {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 0px;
+}
+.keyConfigSetView thead th {
+  border: 0;
+  font-weight: normal;
+  padding-left: 9px;
+}
+tbody .data:hover {
+  background: lavender;
+}
+th, td {
+  font-size: 0.9em;
+}
+.th_inner {
+  position: absolute;
+  top: -1px;
+  height: 30px;
+  padding-top: 7px;
+  background-color: #F6F6F6;
+}
+.th_inner.options {
+  padding-left: 6px;
+}
+.th_inner.desc {
+  padding-left: 0;
+}
+.new, .origin {
+  color: #000000;
+  white-space: nowrap;
+  font: 1.0em 'Arial';
+  outline: 0;
+  padding: 0 4px;
+  display: inline-block;
+  border-radius: 3px;
+  box-shadow: none;
+  border: 1px solid rgba(0,0,0,0);
+  /* cursor: pointer; */
+  margin-right: 10px;
+}
+.new.disabled span {
+  color: #CC0000;
+}
+.keyConfigSetView .through span {
+  color: #333333;
+  border: 1px solid #CCCCCC;
+  background: #DDDDDD;
+}
+.origin.disabled, .icon-arrow-right.disabled {
+  display: none;
+}
+.origin.bookmark,
+.icon-arrow-right.bookmark,
+.icon-arrow-right.sleep,
+.icon-arrow-right.comment {
+  display: none;
+}
+/* .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+.new:focus span, .origin.remap:focus span, .origin.keydown:focus span {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  background: #FFFFFF;
+} */
+.new span, .origin span {
+  padding: 1px 3px;
+  border: 1px solid lightblue;
+  border-radius: 3px;
+  min-width: 24px;
+  display: inline-block;
+  text-align: center;
+  margin: 0px 1px;
+  font-family: verdana;
+}
+.new span {
+  /* color: #518BAB; */
+  font-weight: bold;
+}
+.origin span {
+  color: #000000;
+}
+.keyConfigSetView .addnew th {
+  padding: 0 7px 5px 7px;
+}
+.keyConfigSetView .addnew th div.addnew {
+  padding: 2px 4px;
+}
+div.addnew:focus {
+  margin-top: 5px;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  background: #FFFFFF;
+  font-weight: normal;
+  color: #999999;
+}
+.keyConfigSetView td.options {
+  padding-left: 10px;
+  white-space: nowrap;
+  position: relative;
+}
+.selectMode, .selectCog {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  padding: 2px 1px;
+  background: #FFFFFF;
+  border-radius: 3px;
+}
+.selectMode.selecting {
+  display: block;
+}
+.data:hover .selectCog.selecting {
+  display: block;
+}
+.selectMode i, .selectCog i {
+  width: 15px;
+  display: inline-block;
+  text-align: center;
+}
+.selectMode div, .selectCog div {
+  padding: 3px 5px;
+  font-family: 'Arial';
+  cursor: default;
+}
+.selectMode .icon {
+  color: #666666;
+}
+.selectMode div:hover, .selectCog div:hover {
+  background: rgb(232, 234, 237);
+}
+.selectMode div:hover .icon {
+  color: #000000;
+}
+div.mode {
+  font-family: 'Arial';
+  /* cursor: pointer; */
+  padding-left: 6px;
+  text-align: center;
+}
+div.mode .icon {
+  color: #333333;
+}
+div.mode .icon.icon-ban-circle {
+  color: #CC0000;
+}
+div.mode .icon-caret-down {
+  margin-left: 4px;
+  font-size: 1.1em;
+  color: rgba(0,0,0,0);
+}
+/* div.mode:hover .icon-caret-down {
+  color: #333;
+} */
+/* div.mode:hover .icon {
+  color: #000000;
+} */
+div.mode[title='Pause'] {
+  cursor: auto;
+}
+/* div.mode[title='Pause']:hover .icon-caret-down {
+  color: rgba(0,0,0,0);
+}
+div.mode[title='Pause']:hover .icon {
+  color: #333333;
+} */
+div.mode.selecting .icon-caret-down {
+  color: 333;
+}
+i.icon-arrow-right {
+  color: #518BAB;
+}
+.keyConfigSetView thead tr {
+  border: none;
+}
+.keyConfigSetView thead .thRemap {
+  min-width: 90px;
+}
+.keyConfigSetView thead .thArrow {
+  min-width: 20px;
+  padding-left: 1px;
+}
+.keyConfigSetView thead .thOrigin {
+  min-width: 80px;
+}
+.keyConfigSetView thead .thOptions {
+  min-width: 40px;
+}
+.keyConfigSetView tbody td, .keyConfigSetView tbody th {
+  border: 0;
+}
+.keyConfigSetView .borderRow > td  {
+  padding: 0;
+}
+.keyConfigSetView .borderRow > td > div  {
+  border-top: 1px dotted #cccccc;
+}
+.keyConfigSetView tbody .thRemap {
+  white-space: nowrap;
+}
+.keyConfigSetView tbody .thOrigin {
+  height: 32px;
+  white-space: nowrap;
+}
+.keyConfigSetView tbody .desc {
+  position: relative;
+  width: 80%;
+  padding: 0 10px;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.keyConfigSetView tbody .desc > * {
+  float: left;
+  max-width: 200px;
+}
+.sectInit, .ctgIcon {
+  min-width: 19px;
+  border-radius: 3px;
+  color: white;
+  padding: 0 3px;
+  margin-right: 3px;
+  text-align: center;
+  cursor: default;
+}
+.sectInit {
+  width: 17px;
+  background: rgb(122, 122, 160);
+}
+.Tab {
+  background: rgb(133, 203, 241); /* light blue */
+}
+.Win {
+  background: rgb(62, 226, 120); /* light green */
+}
+.CSS {
+  background: rgb(105, 138, 69); /* light green */
+}
+.JS {
+  /* background: rgb(255, 175, 56);  orange */
+  background: rgb(255, 184, 79);
+}
+.Clip {
+  background: rgb(213, 114, 193); /* purple */
+}
+.Clr {
+  background: #ADFF44;
+}
+.Ext {
+  background: #f66;
+}
+.desc button.cog {
+  right: 6px;
+  padding: 0 6px;
+  display: none;
+  float: right;
+  height: 19px;
+}
+/* .data:hover button.cog {
+  display: inline-block;
+} */
+.selectCog {
+  right: 10px;
+  top: 26px;
+}
+.selectCog i {
+  color: #666666;
+}
+/* .selectCog div:hover i {
+  color: #000000;
+} */
+.selectCog .menuChangeIcon {
+  display: none;
+}
+.selectCog .formLoadIcon {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+.selectCog .changeIcon {
+  margin: 0;
+  padding: 0;
+}
+.selectCog input.loadIcon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+  opacity: 0;
+}
+.selectCog input.loadIcon:focus {
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+.keyConfigSetView .desc .icon-star {
+  color: gold;
+  margin: 0 5px 0 2px;
+}
+.keyConfigSetView .desc > div:first-child {
+  float:left;
+}
+.keyConfigSetView .desc > div:last-child {
   overflow: auto;
 }
-td.task i.icon-ok {
-  color: gray;
+.keyConfigSetView .desc div.memo {
+  color: #583521;
+}
+.keyConfigSetView .desc form.memo {
+  display: none;
+}
+.keyConfigSetView .desc input.memo {
+  font-family: 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
+  width: 90%;
+  font-size: 1.0em;
+  padding: 3px;
+  height: 24px;
+}
+.keyConfigSetView .desc div.command {
   float: left;
-  font-size: 9pt;
-  margin-right: 5px;
-  cursor: pointer;
+}
+.keyConfigSetView .desc div.commandCaption {
+  text-overflow: ellipsis;
+  color: #583521;
+}
+.desc .bookmark, .bookmarkOptions .bookmark {
+  -webkit-padding-start: 20px;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  background-position-y: 1px;
+}
+.bookmarkOptions .bookmark {
+  background-position: 4px 4px;
+  text-indent: 4px;
+}
+.keyConfigSetView .caption {
+  color: #000000;
+  font-weight: bold;
+}
+.keyConfigSetView .content3row {
+  font-size: 1.0em;
+}
+.keyConfigSetView .remove {
+  text-align: right;
+  padding-right: 8px;
+}
+.keyConfigSetView .blank {
+  background: #F6F6F6;
+  padding: 0 12px;
+}
+.keyConfigSetView .ui-placeholder {
+  border: 1px solid #FF1E93;
+}
+.keyConfigSetView .ui-sortable-helper .blank {
+  background: rgba(0,0,0,0);
+}
+.keyConfigSetView .toolbarIcon {
+  width: 19px;
+  height: 19px;
+  margin: 1px;
+}
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: rgba(0,0,0,.0);
+}
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.3);
+}
+.custom-scroll-bar::-webkit-scrollbar, .custom-scroll-bar::-webkit-scrollbar-thumb {
+  overflow: visible;
+  border-radius: 1px;
+}
+.custom-scroll-bar::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+}
+.forceBlue {
+  background-color: #1E90FF!important;
+}
+.backscreen {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.parent th:first-child {
+  position: relative;
+  vertical-align: top;
+  padding-top: 4px;
+}
+.grpbartop, .grpbarbtm {
+  position: absolute;
+  width: 5px;
+  height: 50%;
+  right: 2px;
+  background-color: #A5A5A5;
+  border-radius: 1px;
+}
+tr:not(.parent) .grpbartop, tr:not(.parent) .grpbarbtm {
+  display: none;
+}
+.parent .grpbartop {
+  top: 7px;
+}
+.parent .grpbarbtm {
+  bottom: 7px;
+}
+.keyConfigSetView tbody .parent th, .keyConfigSetView tbody .parent td {
+  padding-bottom: 0;
+}
+.keyConfigSetView tbody .child:not(.last) th, .keyConfigSetView tbody .child:not(.last) td {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.hover th:first-child {
+  background-color: lavender;
+}
+.data .desc .updown {
+  display: none;
+  float: right;
+  margin-right: 6px;
+}
+.data .desc .updown i {
+  font-size: 0.8em;
+}
+.data .desc .updown button {
+  display: flex;
+  padding: 3px 5px;
+}
+/* .data:hover .desc .updown {
+  display: flex;
+} */
+.inputSleep {
+  display: none;
+  border: 1px solid #ccc;
+  width: 60px;
+  height: 20px;
+}
+.dispSleep {
+  background-color: #ff8;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+.editSleep {
   visibility: hidden;
+  /* cursor: pointer; */
+  color: #999;
 }
-td.task i.icon-ok:hover {
-  color: black;
+/* .editSleep:hover {
+  color: #000;
 }
-td.task:hover i.icon-ok {
-  visibility: visible;
+.formSleep:hover .editSleep {
+  visibility: inherit;
+} */
+.msec {
+  font-size: 0.7em;
+  color: #999;
+}
+.sleepMSec {
+  border: 1px solid #ccc;
+  box-shadow: inset 0px 1px 6px #ccc;
+  transition: box-shadow 0.0s, border 0.5s, background 0.5s;
+  text-indent: 3px;
 }

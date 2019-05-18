@@ -1,14 +1,3 @@
-keyCodes = {}
-scHelp = null
-scHelpSect = null
-keys = null
-router = null
-keyConfigSetView = null
-ctxMenuManagerView = null
-
-F =
-  range: (from, to) -> [Array(to - from + 1)...].map((_, i) => i + from)
-
 PopupBaseView = Backbone.View.extend
   initialize: (options) ->
     router.on "showPopup", @onShowPopup, @
@@ -284,48 +273,6 @@ class SettingsView extends PopupBaseView
         if (new Blob([jsonstr])).size >= 4096
           keyConfigSet[i].new
           break
-
-commandsDisp =
-  createTab:      ["tab", "Create new tab"]
-  createTabBG:    ["tab", "Create new tab in inactivate"]
-  moveTabLeft:    ["tab", "Move current tab left"]
-  moveTabRight:   ["tab", "Move current tab right"]
-  moveTabFirst:   ["tab", "Move current tab to first position"]
-  moveTabLast:    ["tab", "Move current tab to last position"]
-  closeOtherTabs: ["tab", "Close other tabs"]
-  closeTabsLeft:  ["tab", "Close tabs to the left"]
-  closeTabsRight: ["tab", "Close tabs to the right"]
-  duplicateTab:   ["tab", "Duplicate current tab"]
-  pinTab:         ["tab", "Pin/Unpin current tab"]
-  detachTab:      ["tab", "Detach current tab"]
-  detachPanel:    ["tab", "Detach current tab as panel"]
-  detachSecret:   ["tab", "Detach current tab in an incognito mode"]
-  attachTab:      ["tab", "Attach current tab to a next window"]
-  zoomFixed:      ["tab", "Zooms current tab by fixed zoom factor"]
-  zoomInc:        ["tab", "Zooms current tab by increments zoom factor"]
-  switchPrevWin:  ["win", "Switch to the previous window"]
-  switchNextWin:  ["win", "Switch to the next window"]
-  closeOtherWins: ["win", "Close other windows"]
-  discardTabs:    ["tab", "Discards unselected tabs from memory"]
-  # historyGoBack:  ["tab", "Go back to the previous page from browsing history"]
-  # historyForward: ["tab", "Go forward the next page from browsing history"]
-  clearCache:     ["clr", "Clear browser's cache"]
-  clearCookiesAll:["clr", "Clear browser's cookies and site data"]
-  clearHistory:   ["clr", "Clear browsing history"]
-  clearCookies:   ["clr", "Clear cookies for the current domain"]
-  #clearHistoryS:  ["clr", "Delete specific browsing history", [], "Clr"]
-  clearTabHistory:["clr", "Clear tab history by duplicating the URL"]
-  pasteText:      ["custom", "Paste static text", [], "Clip"]
-  #copyText:       ["clip", "Copy text with history", "Clip"]
-  #showHistory:    ["clip", "Show copy history"     , "Clip"]
-  openExtProg:    ["custom", "Open URL from external program", [], "Ext"]
-  insertCSS:      ["custom", "Insert CSS", [{ value:"allFrames", caption:"All frames" }], "CSS", ""]
-  execJS:         ["custom", "Execute Script", [
-    { value:"jquery"    , caption:"jQuery" }
-    { value:"coffee"    , caption:"CoffeeScript" }
-    { value:"allFrames" , caption:"All frames" }
-    { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
-  ], "JS"]
 
 catnames =
   tab: "Tab"
@@ -945,7 +892,7 @@ class CtxMenuManagerView extends ExplorerBaseView
     @setContextMenu()
     @setSortable ".folders", ".title,.menuCaption", @onUpdateFolder
     @setSortable ".ctxMenus", ".menuCaption", @onUpdateMenu
-    @disableButton XX(".editButtons button").map (el) -> el.className.replace(/\s+/g, '.')
+    @disableButton F.XX(".editButtons button").map (el) -> el.className.replace(/\s+/g, '.')
     # @$el.append @tmplHelp @
     @
   onSubmitForm: ->

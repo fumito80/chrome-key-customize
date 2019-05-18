@@ -1,10 +1,3 @@
-pipe = (fn, fns...) -> (a) -> fns.reduce ((acc, fn2) -> fn2(acc)), fn(a)
-F =
-  map: (f) -> (a) -> a.map f
-  filter: (f) -> (a) -> a.filter f
-  find: (f) -> (a) -> a.find f
-  findIndex: (f) -> (a) -> a.findIndex f
-
 gCurrentTabId = null
 userData = {}
 undoData = {}
@@ -499,7 +492,7 @@ preOpenBookmark = (keyEvent, params) ->
 
   if findtab || openmode is "findonly"
     getAllTabs().done (allTabs) ->
-      getActiveTab().done pipe(
+      getActiveTab().done F.pipe(
         (activeTab) -> allTabs.findIndex (tab) -> tab.id is activeTab.id
         (index) -> allTabs.slice(index + 1).concat allTabs.slice(0, index + 1)
         F.find (tab) -> (tab.title + tab.url).indexOf(findStr) >= 0
@@ -618,7 +611,7 @@ execCommand = (keyEvent) ->
             chrome.windows.create { tabId: tab.id, focused: true, incognito: true }, -> dfd.resolve()
         when "attachTab"
           getActiveTab().done (tab, windowId) ->
-            chrome.windows.getAll { windowTypes: ["normal"], populate: true }, pipe(
+            chrome.windows.getAll { windowTypes: ["normal"], populate: true }, F.pipe(
               F.filter (win) -> not win.incognito
               (normalWins) ->
                 currentWinIndex = normalWins.findIndex (win) -> win.tabs.some (wintab) -> wintab.id is tab.id

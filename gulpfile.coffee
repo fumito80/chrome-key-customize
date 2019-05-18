@@ -33,22 +33,45 @@ compile = (source, coffeeOp = {}) ->
     .pipe dest 'dist'
 
 compileOther = ->
-  compile src ['coffee/*.coffee', '!coffee/options*', '!coffee/keyidentifiers.coffee']
+  compile src [
+    'coffee/*.coffee'
+    '!coffee/functions*'
+    '!coffee/options*'
+    '!coffee/background.coffee'
+    '!coffee/popup.coffee'
+  ]
 
-compileMerged = ->
-  compile src(['coffee/optionsExtends.coffee', 'coffee/options.coffee']).pipe \
+compileOptions = ->
+  compile src([
+    'coffee/functions.coffee'
+    'coffee/optionsClasses.coffee'
+    'coffee/optionsExtends.coffee'
+    'coffee/options.coffee'
+  ]).pipe \
     concat 'options.coffee'
 
-compileBare = ->
-  compile src(['coffee/keyidentifiers.coffee']),
-  "bare": true
+compileBackground = ->
+  compile src([
+    'coffee/functions.coffee'
+    'coffee/background.coffee'
+  ]).pipe \
+    concat 'background.coffee'
+
+compilePopup = ->
+  compile src([
+    'coffee/functions.coffee'
+    'coffee/optionsClasses.coffee'
+    'coffee/popup.coffee'
+  ]).pipe \
+    concat 'popup.coffee'
 
 clean = (cb) -> del ['dist'], cb
 
 build = series(
   clean
-  # compileBare
-  compileMerged
+  compileOptions
+  compileBackground
+  compilePopup
   compileOther
   cp
   zip
@@ -57,7 +80,9 @@ build = series(
 exports.src = cp
 
 exports.coffee = series(
-  compileMerged
+  compileOptions
+  compileBackground
+  compilePopup
   compileOther
 )
 
@@ -65,6 +90,7 @@ exports.default = exports.prd = build
 
 # nmh
 nmh_clean = (cb) ->
+  console.log process.env.LOCALAPPDATA + '/Shortcutware'
   del [process.env.LOCALAPPDATA + '/Shortcutware/Flexkbd64.*'], force: true, cb
 
 nmh_cp_dll = ->

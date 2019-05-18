@@ -10,6 +10,9 @@
   font-weight: normal;
   src: local('Noto Suns'), url('fonts/NotoSans-Regular.ttf') format('ttf');
 }
+html {
+  overflow: hidden;
+}
 body {
   padding: 0 4px 0 20px;
   margin: 0 0 0 12px;
@@ -382,12 +385,15 @@ i.icon-arrow-right {
   width: 80%;
   padding: 0 10px;
   cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .keyConfigSetView tbody .desc > * {
   float: left;
+  max-width: 200px;
 }
 .sectInit, .ctgIcon {
-  min-width: 18px;
+  min-width: 19px;
   border-radius: 3px;
   color: white;
   padding: 0 3px;
@@ -465,9 +471,9 @@ i.icon-arrow-right {
   box-shadow: none;
   outline: none;
 }
-.keyConfigSetView .desc .content {
+/* .keyConfigSetView .desc .content {
   overflow: auto;
-}
+} */
 .keyConfigSetView .desc .icon-star {
   color: gold;
   margin: 0 5px 0 2px;

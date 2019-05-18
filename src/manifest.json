@@ -8,17 +8,21 @@
     "16": "images/toolbarIcon.png",
     "128": "images/default.png"
   },
-  "options_page": "options.html",
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "options.html"
+  },
   "background": {
     "page": "background.html",
     "persistent": true
   },
   "browser_action": {
+    "default_popup": "popup.html",
     "default_icon": {
       "19": "images/default.png",
       "38": "images/default.png"
     },
-    "default_title": "Shortcutware"
+    "default_title": "backroom"
   },
   "web_accessible_resources": ["kbdagent.js", "help_jp.html", "help_us.html"],
   "content_security_policy": "script-src 'unsafe-eval' 'self'; object-src 'self';",

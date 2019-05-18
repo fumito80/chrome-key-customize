@@ -158,11 +158,15 @@ begin
     with pShareData(p)^ do begin
       pMHS:= PMouseHookStruct(lPrm);
       GetClassName(pMHS^.hwnd, buf, SizeOf(buf));
-      if (wPrm = WM_MOUSEMOVE) and (mouseWheelF) and (AnsiStartsText(CHROME_CLASS_WIDGET, buf)) then begin
-        // in mouse wheel area
-        ScreenToClient(pMHS^.hwnd, pMHS^.pt);
-        if (pMHS^.pt.y < 50) then begin
-          inWheelTabArea:= True;
+      if (wPrm = WM_MOUSEMOVE) and (mouseWheelF) then begin
+        if (AnsiStartsText(CHROME_CLASS_WIDGET, buf)) then begin
+          // in mouse wheel area
+          ScreenToClient(pMHS^.hwnd, pMHS^.pt);
+          if (pMHS^.pt.y < 50) then begin
+            inWheelTabArea:= True;
+          end else begin
+            inWheelTabArea:= False;
+          end;
         end else begin
           inWheelTabArea:= False;
         end;

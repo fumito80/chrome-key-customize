@@ -222,7 +222,7 @@ var
   extPath, dir: String;
 begin
   extPath:= SysUtils.GetEnvironmentVariable('USERPROFILE') + extPath2 + extId;
-  dir :=IncludeTrailingPathDelimiter(extPath);
+  dir:= IncludeTrailingPathDelimiter(extPath);
 
   if FindFirst(dir + '*.*', faAnyFile, rec) = 0 then begin
     try

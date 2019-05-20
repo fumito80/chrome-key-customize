@@ -223,14 +223,13 @@ th, td {
   border: 1px solid #CCCCCC;
   background: #DDDDDD;
 }
-.origin.disabled, .icon-arrow-right.disabled {
+tbody .origin,
+tbody .icon-arrow-right {
   display: none;
 }
-.origin.bookmark,
-.icon-arrow-right.bookmark,
-.icon-arrow-right.sleep,
-.icon-arrow-right.comment {
-  display: none;
+.origin.remap,
+.icon-arrow-right.remap {
+  display: inline;
 }
 .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
   border-color: #80bdff;
@@ -333,13 +332,13 @@ div.mode:hover .icon-caret-down {
 div.mode:hover .icon {
   color: #000000;
 }
-div.mode[title='Pause'] {
+div.mode[title='Suspend'] {
   cursor: auto;
 }
-div.mode[title='Pause']:hover .icon-caret-down {
+div.mode[title='Suspend']:hover .icon-caret-down {
   color: rgba(0,0,0,0);
 }
-div.mode[title='Pause']:hover .icon {
+div.mode[title='Suspend']:hover .icon {
   color: #333333;
 }
 div.mode.selecting .icon-caret-down {
@@ -488,10 +487,12 @@ i.icon-arrow-right {
 }
 .keyConfigSetView .desc form.memo {
   display: none;
+  width: 80%;
+  max-width: 80%;
 }
 .keyConfigSetView .desc input.memo {
   font-family: 'Noto Sans', 'Meiryo UI', 'MS UI Gothic', Arial;
-  width: 90%;
+  width: 100%;
   font-size: 1.0em;
   padding: 3px;
   height: 24px;
@@ -533,7 +534,7 @@ i.icon-arrow-right {
   border: 1px solid #FF1E93;
 }
 .keyConfigSetView .ui-sortable-helper .blank {
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
 }
 .keyConfigSetView .toolbarIcon {
   width: 19px;

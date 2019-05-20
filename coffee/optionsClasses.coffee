@@ -18,7 +18,7 @@ modeDisp =
   disabled: ["Disabled"   , "icon-ban-circle"]
   sleep:    ["Sleep"      , "icon-eye-close"]
   comment:  ["Comment"    , "icon-comment-alt"]
-  through:  ["Pause"      , "icon-pause", "nodisp"]
+  through:  ["Suspend"    , "icon-pause", "nodisp"]
 
 bmOpenMode =
   current:   "Open in current tab"
@@ -171,7 +171,7 @@ KeyConfigBaseView = Backbone.View.extend
 
   onSetRowspan: ->
     if (models = @model.collection.where(parentId: @model.id)).length > 0
-      @$el.addClass("parent").find(".selectMode .comment").show().end().find(".disabled").hide()
+      @$el.addClass("parent")
       @$("th:first-child").attr "rowspan", models.length + 1
       @model.set "batch", true
     else
@@ -179,7 +179,6 @@ KeyConfigBaseView = Backbone.View.extend
       @$("th:first-child").removeAttr "rowspan"
       @model.unset "batch"
       unless @$el.hasClass "child"
-        @$(".selectMode .comment").hide().end().find(".disabled").show()
         @$("ul.updown").remove()
 
   onChangeMode: (event, mode) ->
@@ -193,18 +192,14 @@ KeyConfigBaseView = Backbone.View.extend
     @setDispMode mode
     @setDesc()
     @trigger "resizeInput"
-
-  onChangeCtxmenu: ->
-    if (ctxMenu = @model.get("ctxMenu")) && !@$el.hasClass("child")
-      unless ctxMenu.parentId is "route"
-        @model.collection.trigger "getCtxMenuContexts", container = parentId: ctxMenu.parentId
-        ctxMenu.contexts = container.contexts || ctxMenu.contexts
-      @$("td.ctxmenu").html """<div class="ctxmenu-icon" title="Context menu for #{ctxMenu.contexts}\n Title: #{ctxMenu.caption}"><i class="#{tmplCtxMenus[ctxMenu.contexts][1]}"></i></div>"""
-      @$("div.ctxmenu")[0].childNodes[1].nodeValue = " Edit context menu..."
-    else if @model.get("mode") isnt "disabled" && !@$el.hasClass("child")
-      @$("td.ctxmenu").empty()
-      @$("div.ctxmenu")[0].childNodes[1].nodeValue = " Create context menu..."
-    @trigger "resizeInput"
+    if event and mode is "comment"
+      setTimeout(=>
+        editing = (input$ = @$("form.memo").show().find("input.memo")).is(":visible")
+        if editing
+          memo = @$("div.memo").hide()
+          input$.focus().val memo.text()
+          startEdit()
+      , 0)
 
   # Object Method
   getDescription: ->
@@ -223,10 +218,6 @@ KeyConfigBaseView = Backbone.View.extend
     @$(".new,.origin,.icon-arrow-right")
       .removeClass(@optionKeys.join(" "))
       .addClass mode
-    if /remap/.test mode
-      @$("th:eq(1) > *, th:eq(2) > *").show()
-    else
-      @$("th:eq(1) > *, th:eq(2) > *").hide()
 
   setKbdValue: (input$, value) ->
     if value is "00768"
@@ -307,7 +298,7 @@ KeyConfigBaseView = Backbone.View.extend
             #   tooltipClass: "tooltipClass"
     if tdDesc.html() is ""
       tdDesc.append @tmplMemo memo: @model.get("memo")
-      editOption = iconName: "icon-pencil", command: "Edit description"
+      editOption = iconName: "icon-pencil", command: "Edit comment"
     tdDesc.append @tmplDesc editOption
     if mode is "disabled"
       @$(".addKey,.copySC,.seprater.1st,div.ctxmenu,.addCommand").hide()
@@ -455,7 +446,7 @@ KeyConfigSetBaseView = Backbone.View.extend
     @collection.set keyConfigSet
     loading = false
     @redrawTable()
-    $(".fixed-table-container-inner")
+    (scrollContainer = $(".fixed-table-container-inner"))
       .on "scroll", @setScrollingShade.bind(@)
       .niceScroll
         horizrailenabled: false
@@ -465,6 +456,7 @@ KeyConfigSetBaseView = Backbone.View.extend
         cursoropacitymin: .3
         cursoropacitymax: .7
         zindex: 999998
+    @setScrollingShade target: scrollContainer[0]
     @
 
   # Object Method
@@ -497,17 +489,17 @@ KeyConfigSetBaseView = Backbone.View.extend
           tr$.addClass "last"
 
   setScrollingShade: (event) ->
-    { scrollTop, scrollHeight, offsetHeight } = event.target || $(".fixed-table-container-inner")[0]
+    { scrollTop, scrollHeight } = event.target
     if scrollTop < 10
       $(".header-background").removeClass("scrolling")
     else
       $(".header-background").addClass("scrolling")
-      $(".scrollEnd").show()
-    if scrollTop + @scrollingBottomBegin > scrollHeight - offsetHeight
+      # $(".scrollEnd").show()
+    if scrollTop + @scrollingBottomBegin > scrollHeight - (window.innerHeight - $(event.target).offset().top)
       $("footer").removeClass("scrolling")
     else
       $("footer").addClass("scrolling")
-      $(".scrollEnd").show()
+      # $(".scrollEnd").show()
 
   getSaveData: ->
     @collection.remove @collection.findWhere new: @placeholder

@@ -16,7 +16,7 @@ decodeKbdEvent = F.pipe(
   decodeKbdCode
   ([modifiers, scanCode]) ->
     [unshifted, shifted] = keys[scanCode]
-    [0, 2, 1, 3] #, 4, 5, 6]
+    [1, 0, 3, 2] #, 4, 5, 6]
       .filter (i) -> modifiers & Math.pow(2, i)
       .map (i) -> modifierKeys[i]
       .concat (shifted if modifiers & 4) || unshifted

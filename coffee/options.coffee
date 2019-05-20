@@ -115,6 +115,18 @@ class KeyConfigView extends KeyConfigBaseView
   onChangeCommand: ->
     @onChangeMode null, "command"
 
+  onChangeCtxmenu: ->
+    if (ctxMenu = @model.get("ctxMenu")) && !@$el.hasClass("child")
+      unless ctxMenu.parentId is "route"
+        @model.collection.trigger "getCtxMenuContexts", container = parentId: ctxMenu.parentId
+        ctxMenu.contexts = container.contexts || ctxMenu.contexts
+      @$("td.ctxmenu").html """<div class="ctxmenu-icon" title="Context menu for #{ctxMenu.contexts}\n Title: #{ctxMenu.caption}"><i class="#{tmplCtxMenus[ctxMenu.contexts][1]}"></i></div>"""
+      @$("div.ctxmenu")[0].childNodes[1].nodeValue = " Edit context menu..."
+    else if @model.get("mode") isnt "disabled" && !@$el.hasClass("child")
+      @$("td.ctxmenu").empty()
+      @$("div.ctxmenu")[0].childNodes[1].nodeValue = " Create context menu..."
+    @trigger "resizeInput"
+
   onRemove: ->
     if parentId = @model.get "parentId"
       @model.collection.trigger "mouseoutchild", parentId
@@ -251,6 +263,8 @@ class KeyConfigView extends KeyConfigBaseView
     false
 
   onClickMode: (event) ->
+    if event.currentTarget.getAttribute("title") is "Suspend"
+      return
     @$(".selectMode").toggleClass("selecting").focus()
     event.stopPropagation()
 
@@ -500,18 +514,20 @@ class KeyConfigSetView extends KeyConfigSetBaseView
 
   # Collection Events
   onAddRender: (model) ->
-    keyConfigView = new KeyConfigView(model: model)
-    keyConfigView.on "removeConfig"  , @onChildRemoveConfig, @
-    keyConfigView.on "resizeInput"   , @onChildResizeInput , @
-    keyConfigView.on "showPopup"     , @onShowPopup        , @
-    keyConfigView.on "addCtxMenu"    , @onAddCtxMenu       , @
-    keyConfigView.on "updateChildPos", @redrawTable        , @
-    keyConfigView.on "remakeCtxMenu" , @onRemakeCtxMenu    , @
-    keyConfigView.on "getConfigValue", @onGetConfigValue   , @
+    keyConfigView = new KeyConfigView model: model
+    keyConfigView.on
+      "removeConfig"  : @onChildRemoveConfig
+      "resizeInput"   : @onChildResizeInput
+      "showPopup"     : @onShowPopup
+      "addCtxMenu"    : @onAddCtxMenu
+      "updateChildPos": @redrawTable
+      "remakeCtxMenu" : @onRemakeCtxMenu
+      "getConfigValue": @onGetConfigValue
+      @
     divAddNew = @$("tr.addnew")[0] || null
-    tbody = @$("tbody")[0]
     if /^C/.test(model.id) && lastFocused
       divAddNew = lastFocused.nextSibling || null
+    tbody = @$("tbody")[0]
     tbody.insertBefore keyConfigView.render(@model.get("kbdtype"), @model.get("lang")).el, divAddNew
     tbody.insertBefore $(@tmplBorder)[0], divAddNew
     if keyConfigView.state is "invalid"
@@ -766,9 +782,5 @@ $ ->
       keyConfigSetView.onKeyDown event
 
   windowOnResize()
-
-  if ($(".fixed-table-container-inner")[0].scrollHeight - window.innerHeight - 85) > 120
-    $("footer").addClass("scrolling")
-    $(".scrollEnd").show()
 
   Backbone.history.start pushState: false

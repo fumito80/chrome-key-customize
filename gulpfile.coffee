@@ -16,7 +16,7 @@ uglifyOrThru = ->
 zip = (done) ->
   if process.argv.includes 'prd'
     manifest = JSON.parse require('fs').readFileSync('./dist/manifest.json')
-    zipfld './dist', "./zipped/kbd.#{manifest.version}.zip", (err) ->
+    zipfld './dist', "./zipped/backrrom.#{manifest.version}.zip", (err) ->
       done(err)
   else
     console.log 'Skip zipped'

@@ -3,17 +3,16 @@ class HeaderView extends HeaderBaseView
     chrome.runtime.openOptionsPage()
 
 class KeyConfigView extends KeyConfigBaseView
+  onChangeCtxmenu: ->
 
 class KeyConfigSetView extends KeyConfigSetBaseView
   scrollingBottomBegin: 5
   # Collection Events
   onAddRender: (model) ->
-    keyConfigView = new KeyConfigView(model: model)
+    keyConfigView = new KeyConfigView model: model
     tbody = @$("tbody")[0]
-    if /^C/.test(model.id) && lastFocused
-      divAddNew = lastFocused.nextSibling || null
-    tbody.insertBefore keyConfigView.render(@model.get("kbdtype"), @model.get("lang")).el, divAddNew
-    tbody.insertBefore $(@tmplBorder)[0], divAddNew
+    tbody.insertBefore keyConfigView.render(@model.get("kbdtype"), @model.get("lang")).el, null
+    tbody.insertBefore $(@tmplBorder)[0], null
 
 $ = jQuery
 $ ->
@@ -36,7 +35,3 @@ $ ->
   keyConfigSetView.render saveData.keyConfigSet
 
   windowOnResize()
-
-  if ($(".fixed-table-container-inner")[0].scrollHeight - window.innerHeight - 60) > 5
-    $("footer").addClass("scrolling")
-    $(".scrollEnd").show()

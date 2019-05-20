@@ -210,14 +210,13 @@ th, td {
   border: 1px solid #CCCCCC;
   background: #DDDDDD;
 }
-.origin.disabled, .icon-arrow-right.disabled {
+tbody .origin,
+tbody .icon-arrow-right {
   display: none;
 }
-.origin.bookmark,
-.icon-arrow-right.bookmark,
-.icon-arrow-right.sleep,
-.icon-arrow-right.comment {
-  display: none;
+.origin.remap,
+.icon-arrow-right.remap {
+  display: inline;
 }
 /* .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
   border-color: #80bdff;

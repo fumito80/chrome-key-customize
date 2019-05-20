@@ -704,7 +704,14 @@ i.icon-arrow-right {
   width: 16px;
 }
 .popup .expandAll {
-  margin-left: 8px;
+  margin-left: 20px;
+}
+.popup .expandAll::before {
+  margin-top: 2px;
+  height: 16px;
+}
+.popup .expandAll::after {
+  margin-top: -1px;
 }
 .popup .result_outer {
   overflow: auto;

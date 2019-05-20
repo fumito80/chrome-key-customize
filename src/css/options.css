@@ -10,6 +10,29 @@
   font-weight: normal;
   src: local('Noto Suns'), url('fonts/NotoSans-Regular.ttf') format('ttf');
 }
+label > input[type='checkbox'] {
+  float: left;
+  width: 0px;
+  margin-right: 18px !important;
+}
+label > input[type='checkbox']::before {
+  position: absolute;
+  margin-top: 6px;
+  width: 15px;
+  height: 15px;
+  content: ' ';
+  border: 1px solid #999;
+  border-radius: 1px;
+}
+label > input[type='checkbox']:checked::after {
+  position: absolute;
+  font-family: 'FontAwesome';
+  content: '\F00C';
+}
+label > input[type='checkbox']:focus::before {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
 html {
   overflow: hidden;
 }
@@ -856,6 +879,13 @@ i.icon-arrow-right {
 .commandOptions .btn-group .btn {
   cursor: pointer;
   stroke: #333;
+}
+.commandOptions label > input[type='checkbox']::before {
+  margin-top: 1px;
+}
+.commandOptions label > input[type='checkbox']::after {
+  margin-top: 0;
+  margin-left: 1px;
 }
 #radioCoffee:checked + label {
   color: #fff;

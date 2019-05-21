@@ -49,7 +49,7 @@ header .h1 {
 }
 header .title1 {
   font-size: 0.7em;
-  color: #bfc3c5;
+  color: #F6F6F6;
 }
 header .title2 {
   font: 19px 'Subway Black', Arial;
@@ -190,7 +190,7 @@ th, td {
   padding-left: 0;
 }
 .new, .origin {
-  color: #000000;
+  color: var(--gray-dark);
   white-space: nowrap;
   font: 1.0em 'Arial';
   outline: 0;
@@ -203,7 +203,7 @@ th, td {
   margin-right: 10px;
 }
 .new.disabled span {
-  color: #CC0000;
+  color: var(--danger);
 }
 .keyConfigSetView .through span {
   color: #333333;
@@ -242,7 +242,7 @@ tbody .icon-arrow-right {
   font-weight: bold;
 }
 .origin span {
-  color: #000000;
+  color: var(--dark);
 }
 .keyConfigSetView .addnew th {
   padding: 0 7px 5px 7px;
@@ -294,7 +294,7 @@ div.addnew:focus {
   background: rgb(232, 234, 237);
 }
 .selectMode div:hover .icon {
-  color: #000000;
+  color: var(--dark);
 }
 div.mode {
   font-family: 'Arial';
@@ -306,7 +306,7 @@ div.mode .icon {
   color: #333333;
 }
 div.mode .icon.icon-ban-circle {
-  color: #CC0000;
+  color: var(--danger);
 }
 div.mode .icon-caret-down {
   margin-left: 4px;
@@ -319,13 +319,13 @@ div.mode .icon-caret-down {
 /* div.mode:hover .icon {
   color: #000000;
 } */
-div.mode[title='Pause'] {
+div.mode[title='Suspend'] {
   cursor: auto;
 }
-/* div.mode[title='Pause']:hover .icon-caret-down {
+/* div.mode[title='Suspend']:hover .icon-caret-down {
   color: rgba(0,0,0,0);
 }
-div.mode[title='Pause']:hover .icon {
+div.mode[title='Suspend']:hover .icon {
   color: #333333;
 } */
 div.mode.selecting .icon-caret-down {
@@ -497,7 +497,7 @@ i.icon-arrow-right {
   text-indent: 4px;
 }
 .keyConfigSetView .caption {
-  color: #000000;
+  color: var(--dark);
   font-weight: bold;
 }
 .keyConfigSetView .content3row {
@@ -516,7 +516,7 @@ i.icon-arrow-right {
   border: 1px solid #FF1E93;
 }
 .keyConfigSetView .ui-sortable-helper .blank {
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
 }
 .keyConfigSetView .toolbarIcon {
   width: 19px;

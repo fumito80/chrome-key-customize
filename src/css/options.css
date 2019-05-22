@@ -17,7 +17,7 @@ label > input[type='checkbox'] {
 }
 label > input[type='checkbox']::before {
   position: absolute;
-  margin-top: 6px;
+  margin-top: 5px;
   width: 15px;
   height: 15px;
   content: ' ';

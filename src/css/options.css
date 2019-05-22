@@ -47,17 +47,22 @@ label > input[type='radio']::before {
   float: left;
   border-radius: 100%;
 }
-label > input[type='radio']:checked::after {
-  width: 10px;
-  height: 10px;
+label > input[type='radio']::after {
   float: left;
-  border-radius: 100%;
   margin-top: -24px;
   margin-left: 0.0px;
+  font-size: 1.3em;
   font-family: 'FontAwesome';
   content: '\F00C';
   color: limegreen;
-  font-size: 1.3em;
+  opacity: 0;
+  transition: all .15s ease-out;
+}
+label > input[type='radio']:checked::after {
+  opacity: 1;
+}
+label > input[type='radio']:active::after {
+  opacity: 0.3;
 }
 html {
   overflow: hidden;

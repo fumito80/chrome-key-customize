@@ -12,13 +12,13 @@ loading = true
 andy = chrome.extension.getBackgroundPage().andy
 
 modeDisp =
-  remap:    ["Remap"      , "icon-random"]
-  command:  ["Command..." , "icon-asterisk"]
-  bookmark: ["Bookmark...", "icon-bookmark-empty"]
-  disabled: ["Disabled"   , "icon-ban-circle"]
-  sleep:    ["Sleep"      , "icon-eye-close"]
-  comment:  ["Comment"    , "icon-comment-alt"]
-  through:  ["Suspend"    , "icon-pause", "nodisp"]
+  remap:    ["key remap"     , "icon-random"]
+  command:  ["Chrome API..." , "fab fa-chrome"]
+  bookmark: ["Bookmark..."   , "icon-bookmark-empty"]
+  disabled: ["Disabled"      , "icon-ban-circle"]
+  sleep:    ["Sleep"         , "icon-eye-close"]
+  comment:  ["Comment"       , "icon-comment-alt"]
+  through:  ["Suspend"       , "icon-pause", "nodisp"]
 
 bmOpenMode =
   current:   "Open in current tab"
@@ -215,7 +215,8 @@ KeyConfigBaseView = Backbone.View.extend
       .find(".icon")[0].className = "icon " + modeDisp[mode][1]
     if mode is "through"
       mode = @model.get("lastMode") + " through"
-    @$(".new,.origin,.icon-arrow-right")
+    # @$(".new,.origin,.icon-arrow-right")
+    @$el
       .removeClass(@optionKeys.join(" "))
       .addClass mode
 
@@ -325,22 +326,6 @@ KeyConfigBaseView = Backbone.View.extend
 
     @onChangeCtxmenu()
 
-  tmplDesc: _.template """
-    <button class="btn btn-outline-primary btn-sm cog" title="Sub Menu"><i class="icon-ellipsis-horizontal"></i></button>
-    <div class="selectCog" tabIndex="0">
-      <div class="edit"><i class="<%=iconName%>"></i> <%=command%></div>
-      <div class="addCommand"><i class="icon-plus"></i> Add command</div>
-      <div class="ctxmenu"><i class="icon-reorder"></i> Create context menu...</div>
-      <!--<div class="copySC"><i class="icon-copy"></i> Copy script</div>-->
-      <div class="menuChangeIcon"></div>
-      <span class="seprater 1st"><hr style="margin:3px 1px"></span>
-      <div class="pause"><i class="icon-pause"></i> Suspend</div>
-      <div class="resume"><i class="icon-play"></i> Resume</div>
-      <span class="seprater"><hr style="margin:3px 1px"></span>
-      <div class="delete"><i class="icon-trash"></i> Delete</div>
-    </div>
-    """
-
   tmplUpDown: """
     <div class="btn-group updown">
       <button class="btn btn-outline-primary btn-sm" title="up"><i class="icon-chevron-up"></i></button>
@@ -421,7 +406,7 @@ KeyConfigBaseView = Backbone.View.extend
         </div>
       <td class="ctxmenu"></td>
       <td class="desc"></td>
-      <td class="blank">&nbsp;</td>
+      <td class="blank"></td>
     </tr>
     """
 

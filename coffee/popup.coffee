@@ -3,7 +3,14 @@ class HeaderView extends HeaderBaseView
     chrome.runtime.openOptionsPage()
 
 class KeyConfigView extends KeyConfigBaseView
+  events: _.extend
+    "click .run": "onClickRun"
+    KeyConfigBaseView.prototype.events
   onChangeCtxmenu: ->
+  onClickRun: ->
+  tmplDesc: _.template """
+    <button class="btn btn-outline-primary btn-sm run" title="Run command">Run<i class="icon-circle-arrow-right"></i></button>
+  """
 
 class KeyConfigSetView extends KeyConfigSetBaseView
   scrollingBottomBegin: 5

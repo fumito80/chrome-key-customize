@@ -454,6 +454,22 @@ class KeyConfigView extends KeyConfigBaseView
         alert "Not a png image."
     @$(".loadIcon").replaceWith "<input type=\"file\" class=\"loadIcon\" />"
 
+  tmplDesc: _.template """
+    <button class="btn btn-outline-primary btn-sm cog" title="Sub Menu"><i class="icon-ellipsis-horizontal"></i></button>
+    <div class="selectCog" tabIndex="0">
+      <div class="edit"><i class="<%=iconName%>"></i> <%=command%></div>
+      <div class="addCommand"><i class="icon-plus"></i> Add command</div>
+      <div class="ctxmenu"><i class="icon-reorder"></i> Create context menu...</div>
+      <!--<div class="copySC"><i class="icon-copy"></i> Copy script</div>-->
+      <div class="menuChangeIcon"></div>
+      <span class="seprater 1st"><hr style="margin:3px 1px"></span>
+      <div class="pause"><i class="icon-pause"></i> Suspend</div>
+      <div class="resume"><i class="icon-play"></i> Resume</div>
+      <span class="seprater"><hr style="margin:3px 1px"></span>
+      <div class="delete"><i class="icon-trash"></i> Delete</div>
+    </div>
+    """
+
 class KeyConfigSetView extends KeyConfigSetBaseView
   scrollingBottomBegin: 120
 

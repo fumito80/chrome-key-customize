@@ -202,10 +202,11 @@ th, td {
   /* cursor: pointer; */
   margin-right: 10px;
 }
-.new.disabled span {
+.disabled .new span {
   color: var(--danger);
 }
-.keyConfigSetView .through span {
+.through .new span,
+.through .origin span {
   color: #333333;
   border: 1px solid #CCCCCC;
   background: #DDDDDD;
@@ -214,15 +215,15 @@ tbody .origin,
 tbody .icon-arrow-right {
   display: none;
 }
-.origin.remap,
-.icon-arrow-right.remap {
+.remap .origin,
+.remap .icon-arrow-right {
   display: inline;
 }
-/* .new:not(:focus):hover span, .origin.remap:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
+/* .new:not(:focus):hover span, .remap .origin:not(:focus):hover span, .origin.keydown:not(:focus):hover span {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
-.new:focus span, .origin.remap:focus span, .origin.keydown:focus span {
+.new:focus span, .remap .origin:focus span, .origin.keydown:focus span {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
   background: #FFFFFF;
@@ -412,16 +413,23 @@ i.icon-arrow-right {
 .Ext {
   background: #f66;
 }
-.desc button.cog {
-  right: 6px;
-  padding: 0 6px;
-  display: none;
+.desc button.run {
   float: right;
-  height: 19px;
+  padding: 1px 3px;
+  line-height: 1em;
+  display: none;
 }
-/* .data:hover button.cog {
+.run .icon-circle-arrow-right {
+  margin-left: 2px;
+}
+.data:hover .run {
   display: inline-block;
-} */
+}
+.data.child button.run,
+.data.disabled button.run,
+.data.through button.run {
+  display: none;
+}
 .selectCog {
   right: 10px;
   top: 26px;

@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "coffeescript": "^2.3.2",
+    "coffeescript": "^2.4.1",
     "del": "^4.1.0",
     "gulp": "^4.0.0",
     "gulp-coffee": "^3.0.3",

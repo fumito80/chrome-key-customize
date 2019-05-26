@@ -275,8 +275,8 @@ class SettingsView extends PopupBaseView
           break
 
 catnames =
-  tab: "Tab"
-  win: "Window"
+  tab: "Tabs"
+  win: "Windows"
   clr: "Browsing data"
   clip: "Clipboard"
   custom: "Custom"
@@ -892,7 +892,7 @@ class CtxMenuManagerView extends ExplorerBaseView
     @setContextMenu()
     @setSortable ".folders", ".title,.menuCaption", @onUpdateFolder
     @setSortable ".ctxMenus", ".menuCaption", @onUpdateMenu
-    @disableButton F.XX(".editButtons button").map (el) -> el.className.replace(/\s+/g, '.')
+    @disableButton F.$$(".editButtons button").map (el) -> el.className.replace(/\s+/g, '.')
     # @$el.append @tmplHelp @
     @
   onSubmitForm: ->

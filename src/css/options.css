@@ -57,7 +57,7 @@ label > input[type='radio']::after {
   content: '\F00C';
   color: limegreen;
   opacity: 0;
-  transition: all .15s ease-out;
+  transition: all .05s ease-out;
 }
 label > input[type='radio']:checked::after {
   opacity: 1;

@@ -343,7 +343,7 @@ KeyConfigBaseView = Backbone.View.extend
   tmplSleep: _.template """
     <form class="formSleep">
       <span>Sleep</span>
-      <input type="number" class="inputSleep" min="0" max="60000" step="10" required>
+      <input type="number" class="inputSleep" min="0" max="60000" step="100" required>
       <span class="dispSleep" title="Sleep <%=sleep%> msec"><%=sleep%></span>&nbsp;msec
       <i class="icon-pencil editSleep" title="Edit sleep msec(0-60000)"></i>
     </form>

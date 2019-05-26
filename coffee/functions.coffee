@@ -1,5 +1,5 @@
 F =
-  XX: (selector, parent = document) -> [parent.querySelectorAll(selector)...]
+  $$: (selector, parent = document) -> [parent.querySelectorAll(selector)...]
   range: (from, to) -> [Array(to - from + 1)...].map((_, i) => i + from)
   pipe: (fn, fns...) -> (a) -> fns.reduce ((acc, fn2) -> fn2(acc)), fn(a)
   map: (f) -> (a) -> a.map f

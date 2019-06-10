@@ -7,7 +7,13 @@ class KeyConfigView extends KeyConfigBaseView
     "click .run": "onClickRun"
     KeyConfigBaseView.prototype.events
   onChangeCtxmenu: ->
-  onClickRun: ->
+  onClickRun: (e) ->
+    close()
+    chrome.runtime.sendMessage
+      action: "runFromPopup"
+      value1: @model.get("new")
+      value2: 100
+      (resp) -> #console.log resp if resp?.msg isnt "done" && resp isnt "no"
   tmplDesc: _.template """
     <button class="btn btn-outline-primary btn-sm run" title="Run command">Run<i class="icon-circle-arrow-right"></i></button>
   """

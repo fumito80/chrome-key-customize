@@ -123,7 +123,7 @@ getScanCode = (keyName) ->
 
 execShortcut = (dfd, cbDone, transCode, scCode, sleepMSec, execMode, batchIndex) ->
   if transCode
-    [test, modifiers, keyIdentifier] = transCode.exec(/\[(\w*?)\](.+)/) || [false]
+    [test, modifiers, keyIdentifier] = /\[(\w*?)\](.+)/.exec(transCode) || [false]
     if (test)
       modifiersCode = modifiers.toLowerCase().split("").reduce (acc, c) ->
         acc + Math.pow(2, ["c", "a", "s", "w"].indexOf(c))
@@ -185,6 +185,8 @@ chrome.runtime.onMessage.addListener (request, sender, sendResponse) ->
     ), 61000)
     try
       switch request.action
+        when "runFromPopup"
+          execBatchMode request.value1
         when "callShortcut"
           execShortcut dfd, cbDone, request.value1, null, request.value2
         when "keydown"

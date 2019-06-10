@@ -35,9 +35,12 @@ label > input[type='checkbox']:focus::before {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
+label > input[type='checkbox']:disabled::before {
+  background-color: lightgray;
+}
 label > input[type='radio'] {
   width: 0px;
-  margin-right: 17px;
+  margin-right: 17px !important;
 }
 label > input[type='radio']::before {
   border: 1.1px solid #adb5bd;
@@ -50,7 +53,7 @@ label > input[type='radio']::before {
 }
 label > input[type='radio']::after {
   float: left;
-  margin-top: -24px;
+  margin-top: -23px;
   margin-left: 0.0px;
   font-size: 1.3em;
   font-family: 'FontAwesome';

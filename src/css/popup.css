@@ -415,9 +415,10 @@ i.icon-arrow-right {
 }
 .desc button.run {
   float: right;
-  padding: 1px 3px;
+  padding: 1px 3px 1px 5px;
   line-height: 1em;
   display: none;
+  border-radius: 12px;
 }
 .run .icon-circle-arrow-right {
   margin-left: 2px;

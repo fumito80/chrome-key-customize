@@ -981,6 +981,7 @@ i.icon-arrow-right {
 }
 .optionExtProg .progPath {
   width: 500px;
+  margin-left: 24px;
 }
 .optionExtProg span.shortcut {
   margin-right: 35px;

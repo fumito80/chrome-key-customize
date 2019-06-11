@@ -279,7 +279,7 @@ catnames =
   win: "Windows"
   clr: "Browsing data"
   clip: "Clipboard"
-  custom: "Custom"
+  custom: "Other"
 
 class OptionExtProgView extends PopupBaseView
   name: "optionExtProg"
@@ -288,20 +288,21 @@ class OptionExtProgView extends PopupBaseView
     "change input[name='program']": "onChangeProgram"
     PopupBaseView.prototype.events
   render: ->
-    @$(".progPath").val ""
-    if @options = @model.get("command")
+    @$(".progPath").val("").prop("disabled", true)
+    if (@options = @model.get("command")) and @options.name is "openExtProg"
       value = @options.content
       if (radio = @$("input[name='program'][value='#{value}']")).length is 0
         @$(".progPath").val value
         value = "other"
+        @$(".progPath").prop("disabled", false).focus()
     else
       value = "firefox"
     @$("input[name='program'][value='#{value}']")[0].checked = true
   onChangeProgram: (event) ->
     if @$("input[name='program'][value='other']").is(":checked")
-      @$(".progPath").focus()
+      @$(".progPath").prop("disabled", false).focus()
     else
-      @$(".progPath").blur()
+      @$(".progPath").prop("disabled", true).blur()
   onSubmitForm: ->
     if (content = @$("input[name='program']:checked").val()) is "other"
       caption = content = $.trim @$(".progPath").val()

@@ -14,6 +14,7 @@ andy = chrome.extension.getBackgroundPage().andy
 modeDisp =
   remap:    ["key remap"     , "icon-random"]
   command:  ["Chrome API..." , "fab fa-chrome"]
+  script:   ["Script..."     , "fab fa-js"]
   bookmark: ["Bookmark..."   , "icon-bookmark-empty"]
   disabled: ["Disabled"      , "icon-ban-circle"]
   sleep:    ["Sleep"         , "icon-eye-close"]
@@ -61,17 +62,17 @@ commandsDisp =
   clearCookies:   ["clr", "Clear cookies for the current domain"]
   #clearHistoryS:  ["clr", "Delete specific browsing history", [], "Clr"]
   clearTabHistory:["clr", "Clear tab history by duplicating the URL"]
+  openExtProg:    ["custom", "Open URL from external program", [], "Ext"]
   pasteText:      ["custom", "Paste static text", [], "Clip"]
   #copyText:       ["clip", "Copy text with history", "Clip"]
   #showHistory:    ["clip", "Show copy history"     , "Clip"]
-  openExtProg:    ["custom", "Open URL from external program", [], "Ext"]
   insertCSS:      ["custom", "Insert CSS", [{ value:"allFrames", caption:"All frames" }], "CSS", ""]
-  execJS:         ["custom", "Execute Script", [
-    { value:"jquery"    , caption:"jQuery" }
-    { value:"coffee"    , caption:"CoffeeScript" }
-    { value:"allFrames" , caption:"All frames" }
-    { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
-  ], "JS"]
+  # execJS:         ["custom", "Execute Script", [
+  #   { value:"jquery"    , caption:"jQuery" }
+  #   { value:"coffee"    , caption:"CoffeeScript" }
+  #   { value:"allFrames" , caption:"All frames" }
+  #   { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
+  # ], "JS"]
 
 escape = (html) ->
   entity =

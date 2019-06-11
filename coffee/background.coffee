@@ -23,14 +23,14 @@ notifIcons =
   "comment" : "comment.png"
   "comments": "comments.png"
 
-chrome.browserAction.onClicked.addListener ->
-  getActiveTab().done (tab, windowId) ->
-    if tab.url.startsWith "chrome-extension://#{chrome.runtime.id}/options.html"
-      sendMessage
-        action: "kbdEvent"
-        value: "00768"
-    else
-      execBatchMode "00768"
+# chrome.browserAction.onClicked.addListener ->
+#   getActiveTab().done (tab, windowId) ->
+#     if tab.url.startsWith "chrome-extension://#{chrome.runtime.id}/options.html"
+#       sendMessage
+#         action: "kbdEvent"
+#         value: "00768"
+#     else
+#       execBatchMode "00768"
 
 nmhPort = null
 postNMH = (command, prm1, prm2, test) ->
@@ -815,20 +815,20 @@ window.andy =
         dfd.resolve()
       else
         @local.ctxMenuFolderSet = []
-        @local.keyConfigSet = [
-          mode:   "bookmark"
-          "new":  "00768"
-          order:  0
-          origin: "0130"
-          title: "Shortcutware"
-          bookmark:
-            title:      "Shortcutware"
-            url:        "chrome-extension://#{chrome.runtime.id}/options.html"
-            findtab:    true
-            openmode:   "last"
-            findStr:    "chrome-extension://#{chrome.runtime.id}/options.html"
-            noActivate: false
-        ]
+        @local.keyConfigSet = []
+        #   mode:   "bookmark"
+        #   "new":  "00768"
+        #   order:  0
+        #   origin: "0130"
+        #   title: "Shortcutware"
+        #   bookmark:
+        #     title:      "Shortcutware"
+        #     url:        "chrome-extension://#{chrome.runtime.id}/options.html"
+        #     findtab:    true
+        #     openmode:   "last"
+        #     findStr:    "chrome-extension://#{chrome.runtime.id}/options.html"
+        #     noActivate: false
+        # ]
         lang = chrome.i18n.getUILanguage()
         if /^ja/.test lang
           @local.config = { kbdtype: "JP", lang: "ja" }

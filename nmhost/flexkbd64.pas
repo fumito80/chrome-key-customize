@@ -280,7 +280,7 @@ begin
     SetLength(exeName, MAX_PATH + 1);
     if QueryFullProcessImageNameW(hHandle, 0, PWideChar(exeName), @exeNameLen) then begin
       SetLength(exeName, StrLen(PWideChar(exeName)));
-      if String(exeName).EndsWith('chrome.exe') then begin
+      if (String(exeName).EndsWith('chrome.exe') or String(exeName).EndsWith('msedge.exe')) then begin
         Exit (threadID);
       end;
     end;

@@ -5,3 +5,13 @@ temp/
 /*.zip
 zipped/*  
 !.gitkeep
+nmhost/backup/
+nmhost/*.ppu
+nmhost/*.o
+nmhost/*.obj
+nmhost/*.a
+nmhost/*.lps
+nmhost/*.compiled
+nmhost/*.res
+nmhost/*.exe
+nmhost/*.dll

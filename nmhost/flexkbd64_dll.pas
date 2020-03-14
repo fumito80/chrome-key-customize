@@ -375,10 +375,10 @@ begin
 end;
 
 // Start MouseHook
-procedure StartMouseHook(p: pointer);
+procedure StartMouseHook(configMode: Boolean; p: pointer);
 begin
   with pShareData(p)^ do begin
-    mouseHookTh:= TMouseHookTh.Create(mousePipeName, hStdOut, keyConfigList, False);
+    mouseHookTh:= TMouseHookTh.Create(mousePipeName, hStdOut, keyConfigList, configMode);
     hookMouse:= SetWindowsHookEx(WH_MOUSE, @MouseHookFunc, hInstance, tId);
     if (g_mouseWheelF) then begin
       hookMouseWheel:= SetWindowsHookEx(WH_GETMESSAGE, @MouseWheelHookFunc, hInstance, tId);
@@ -449,16 +449,18 @@ begin
         g_configMode:= configMode;
         CallNamedPipe(keyPipeName, @g_reloadConfig, SizeOf(UInt64), @dummyFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
       end;
-      mouseWheelF:= g_mouseWheelF;
-      mouseGesturesF:= g_mouseGesturesF;
-      if (mouseWheelF) or (mouseGesturesF) then begin
-        if (mouseHookTh = nil) then begin
-          StartMouseHook(p);
-        end else begin
-          CallNamedPipe(mousePipeName, @g_reloadConfig, SizeOf(UInt64), @dummyFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
+      if (mouseWheelF <> g_mouseWheelF) or (mouseGesturesF <> g_mouseGesturesF) then begin
+        if (mouseHookTh <> nil) then begin
+          EndMouseHook(p);
         end;
-      end else begin
-        EndMouseHook(p);
+        mouseWheelF:= g_mouseWheelF;
+        mouseGesturesF:= g_mouseGesturesF;
+        if (mouseWheelF) or (mouseGesturesF) then begin
+          StartMouseHook(configMode, p);
+        end;
+      end;
+      if (mouseHookTh <> nil) then begin
+        CallNamedPipe(mousePipeName, @g_reloadConfig, SizeOf(UInt64), @dummyFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
       end;
     end;
   finally

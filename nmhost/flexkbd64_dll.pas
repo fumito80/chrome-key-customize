@@ -187,7 +187,7 @@ begin
             if (msgFlag > 0) then begin
               CallNamedPipe(mousePipeName, @msgFlag, SizeOf(msgFlag), @cancelFlag, SizeOf(Boolean), bytesRead, NMPWAIT_WAIT_FOREVER);
               if (cancelFlag) then begin
-                mouse_event(MOUSEEVENTF_LEFTUP or MOUSEEVENTF_ABSOLUTE, 0, 0, 0, 0);
+                //mouse_event(MOUSEEVENTF_LEFTUP or MOUSEEVENTF_ABSOLUTE, 0, 0, 0, 0);
                 Exit (1);
               end;
             end;

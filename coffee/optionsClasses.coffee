@@ -67,12 +67,12 @@ commandsDisp =
   #copyText:       ["clip", "Copy text with history", "Clip"]
   #showHistory:    ["clip", "Show copy history"     , "Clip"]
   insertCSS:      ["custom", "Insert CSS", [{ value:"allFrames", caption:"All frames" }], "CSS", ""]
-  # execJS:         ["custom", "Execute Script", [
-  #   { value:"jquery"    , caption:"jQuery" }
-  #   { value:"coffee"    , caption:"CoffeeScript" }
-  #   { value:"allFrames" , caption:"All frames" }
-  #   { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
-  # ], "JS"]
+  execJS:         ["custom", "Execute Script", [
+    { value:"jquery"    , caption:"jQuery" }
+    { value:"coffee"    , caption:"CoffeeScript" }
+    { value:"allFrames" , caption:"All frames" }
+    { value:"useUtilObj", caption:"""Use <a href="helpview.html#utilobj" target="helpview">utility object</a>""" }
+  ], "JS"]
 
 escape = (html) ->
   entity =

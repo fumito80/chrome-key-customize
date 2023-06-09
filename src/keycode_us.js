@@ -43,6 +43,7 @@ keys[0x28] = ["'", "\""];
 keys[0x29] = ["\\", "|"];
 keys[0x2A] = ["Left Shift"];
 //keys[0x2B] = ["\\"];
+// keys[0x2B] = ["`", "~"];
 keys[0x2C] = ["z", "Z"];
 keys[0x2D] = ["x", "X"];
 keys[0x2E] = ["c", "C"];

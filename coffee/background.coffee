@@ -1039,8 +1039,9 @@ startNMH = ->
       postNMH "StartApp", chrome.runtime.id
 
 scrapeHelpScKey = (sectInit, elTab) ->
-  targets = $(elTab).find "tr:has(td:first-child:not(:has(strong)))"
-  [targets...].reduce (acc, elem) ->
+  targets = $(elTab).find "tr>td:first-child:not(:has(strong))"
+  # targets = $(elTab).find "tr:has(td:first-child:not(:has(strong)))"
+  [targets...].map((el) -> el.parentElement).reduce (acc, elem) ->
     [elContent, elSckey] = elem.cells
     content = elContent.textContent.replace /^\s+|\s$/g, ""
     [elSckey.getElementsByTagName("strong")...].forEach (strong) ->
@@ -1063,9 +1064,12 @@ scrapeHelpScKey = (sectInit, elTab) ->
     acc
   , {}
 
-scrapeHelpSection = (text) ->
-  doc = $ text
-  [mainSection] = doc.find("div.cc")
+parser = new DOMParser()
+
+scrapeHelpSection = (htmlString) ->
+  # doc = $ text
+  doc = parser.parseFromString htmlString, "text/html"
+  mainSection = doc.querySelector "div.cc"
   [mainSection.children...].reduce ([accOS, accHelp, accHelpSect], el) ->
     os = if el.tagName is "H2" then el.textContent else accOS
     if /^Windows.+Linux$/.test(os) and el.className is "zippy"

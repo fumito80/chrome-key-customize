@@ -24,5 +24,8 @@
   },
   "dependencies": {
     "codemirror": "^5.45.0"
+  },
+  "volta": {
+    "node": "18.16.0"
   }
 }

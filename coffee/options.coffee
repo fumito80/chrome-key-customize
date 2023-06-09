@@ -786,6 +786,7 @@ $ ->
         keyConfigSetView.collection.trigger "kbdEvent", request.value
       when "saveConfig"
         andy.saveConfig keyConfigSetView.getSaveData()
+    false
 
   $(window)
     .on "unload", ->

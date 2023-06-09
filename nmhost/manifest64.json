@@ -3,5 +3,5 @@
 	"description": "Shortcutware Native Messaging Host",
 	"path": "flexkbd64.exe",
 	"type": "stdio",
-	"allowed_origins": ["chrome-extension://jfppigbedaokgkihkgjjmmifhabgflif/", "chrome-extension://blngoaefdecilbngbjllinninnoempag/"]
+	"allowed_origins": ["chrome-extension://bhhdepkppbopaapalegpakdplkmedmja/", "chrome-extension://blngoaefdecilbngbjllinninnoempag/"]
 }
